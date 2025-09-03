@@ -39,8 +39,17 @@ class InternshipTracker {
             // Initialize services
             await storageService.initialize();
             
-            // Setup data listener
+            // Setup data listener and load initial data
             storageService.onDataChange(this.handleDataChange);
+            
+            // Force initial data load for local storage
+            if (appConfig.USE_LOCAL_STORAGE) {
+                const existingMemos = await this.loadInitialData();
+                this.handleDataChange(existingMemos);
+            }
+            
+            // Update storage status indicator
+            this.updateStorageStatusIndicator();
             
             // Set initial form values
             this.resetForm();
@@ -97,7 +106,12 @@ class InternshipTracker {
             totalMemos: document.getElementById('total-memos'),
             totalHours: document.getElementById('total-hours'),
             weekHours: document.getElementById('week-hours'),
-            avgHours: document.getElementById('avg-hours')
+            avgHours: document.getElementById('avg-hours'),
+            
+            // Storage indicator
+            storageIndicator: document.getElementById('storage-indicator'),
+            storageStatus: document.getElementById('storage-status'),
+            toggleStorage: document.getElementById('toggle-storage')
         };
 
         // Validate critical elements exist
@@ -372,9 +386,43 @@ class InternshipTracker {
 
     // Handle data changes from storage
     handleDataChange(memos) {
+        console.log('Data changed:', memos.length, 'memos loaded');
         this.memos = memos;
         this.applyFilters();
         this.updateStatistics();
+    }
+
+    // Load initial data (for local storage)
+    async loadInitialData() {
+        try {
+            // For local storage, directly read from localStorage
+            const data = localStorage.getItem(appConfig.STORAGE_KEYS.MEMOS);
+            const memos = data ? JSON.parse(data) : [];
+            console.log('Loaded initial data:', memos.length, 'memos');
+            return memos;
+        } catch (error) {
+            console.error('Error loading initial data:', error);
+            return [];
+        }
+    }
+
+    // Update storage status indicator
+    updateStorageStatusIndicator() {
+        if (this.elements.storageStatus) {
+            const isLocal = appConfig.USE_LOCAL_STORAGE;
+            const statusText = isLocal ? '📱 Local Storage Mode' : '☁️ Cloud Storage Mode';
+            this.elements.storageStatus.textContent = statusText;
+            
+            // Update indicator styling
+            if (this.elements.storageIndicator) {
+                this.elements.storageIndicator.style.background = isLocal 
+                    ? 'rgba(79, 70, 229, 0.1)' 
+                    : 'rgba(16, 185, 129, 0.1)';
+                this.elements.storageIndicator.style.borderColor = isLocal 
+                    ? 'rgba(79, 70, 229, 0.2)' 
+                    : 'rgba(16, 185, 129, 0.2)';
+            }
+        }
     }
 
     // Render memos
