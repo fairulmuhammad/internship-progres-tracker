@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Configuration Helper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">🔥 Firebase Configuration Helper</h1>
+        
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-3">Step 1: Enter Your Firebase Configuration</h2>
+            <p class="text-sm text-gray-600 mb-3">Copy your Firebase config from Firebase Console and paste it below:</p>
+            
+            <textarea id="firebase-config" rows="8" class="w-full p-3 border border-gray-300 rounded-md font-mono text-sm" placeholder='Paste your Firebase config here, e.g.:
+{
+  "apiKey": "AIzaSyA...",
+  "authDomain": "your-project.firebaseapp.com",
+  "projectId": "your-project-id",
+  "storageBucket": "your-project.appspot.com",
+  "messagingSenderId": "123456789",
+  "appId": "1:123456789:web:abc123"
+}'></textarea>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-3">Step 2: Choose Storage Method</h2>
+            <div class="space-y-2">
+                <label class="flex items-center">
+                    <input type="radio" name="storage" value="local" checked class="mr-2">
+                    <span>Local Storage (offline, browser-specific)</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="storage" value="firebase" class="mr-2">
+                    <span>Firebase (cloud, cross-device sync)</span>
+                </label>
+            </div>
+        </div>
+
+        <button onclick="generateConfig()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+            Generate Configuration
+        </button>
+
+        <div id="output" class="mt-6 hidden">
+            <h2 class="text-lg font-semibold mb-3">Step 3: Update Your index.html</h2>
+            <p class="text-sm text-gray-600 mb-3">Replace the configuration section in your index.html with this:</p>
+            <div class="bg-gray-100 p-4 rounded-md">
+                <pre id="config-output" class="text-sm overflow-x-auto"></pre>
+            </div>
+            <button onclick="copyToClipboard()" class="mt-3 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                Copy to Clipboard
+            </button>
+        </div>
+
+        <div class="mt-8 p-4 bg-blue-50 rounded-md">
+            <h3 class="font-semibold text-blue-900 mb-2">🔗 Quick Links</h3>
+            <ul class="space-y-1 text-sm">
+                <li><a href="https://console.firebase.google.com/" target="_blank" class="text-blue-600 hover:underline">Firebase Console</a></li>
+                <li><a href="FIREBASE_SETUP.md" class="text-blue-600 hover:underline">Complete Setup Guide</a></li>
+                <li><a href="index.html" class="text-blue-600 hover:underline">Open Internship Tracker</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function generateConfig() {
+            const configText = document.getElementById('firebase-config').value.trim();
+            const storageMethod = document.querySelector('input[name="storage"]:checked').value;
+            
+            let firebaseConfig = {};
+            let useLocalStorage = storageMethod === 'local';
+            
+            if (!useLocalStorage && configText) {
+                try {
+                    firebaseConfig = JSON.parse(configText);
+                } catch (error) {
+                    alert('Invalid JSON format. Please check your Firebase configuration.');
+                    return;
+                }
+            }
+            
+            const configTemplate = `        // --- Storage Configuration ---
+        const USE_LOCAL_STORAGE = ${useLocalStorage}; // Set to true to use local storage instead of Firebase
+        
+        // --- Firebase Configuration ---
+        // Replace with your Firebase configuration from Firebase Console
+        const firebaseConfig = ${JSON.stringify(firebaseConfig, null, 12)};
+        
+        const appId = 'internship-tracker-default';`;
+            
+            document.getElementById('config-output').textContent = configTemplate;
+            document.getElementById('output').classList.remove('hidden');
+        }
+        
+        function copyToClipboard() {
+            const configText = document.getElementById('config-output').textContent;
+            navigator.clipboard.writeText(configText).then(() => {
+                alert('Configuration copied to clipboard! Now paste it into your index.html file.');
+            }).catch(() => {
+                alert('Could not copy to clipboard. Please select and copy the text manually.');
+            });
+        }
+    </script>
+</body>
+</html>

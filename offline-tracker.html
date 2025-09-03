@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internship Progress Tracker - Offline Mode</title>
+    <style>
+        /* Inline styles for offline use */
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: #374151;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-textarea { resize: vertical; }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+        .btn-primary:hover { background: #4338ca; }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .grid { display: grid; gap: 16px; }
+        .grid-cols-2 { grid-template-columns: 1fr 1fr; }
+        .memo-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .memo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .memo-title { font-weight: 600; color: #1f2937; }
+        .memo-meta { font-size: 12px; color: #6b7280; }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 4px;
+        }
+        .badge-category { background: #dbeafe; color: #1e40af; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #4f46e5;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4f46e5;
+            margin: 8px 0;
+        }
+        .hidden { display: none; }
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header style="text-align: center; margin-bottom: 2rem;">
+            <h1 style="color: #4f46e5; margin-bottom: 8px;">Internship Progress Tracker</h1>
+            <p style="color: #6b7280;">📱 Offline Mode - Data saved locally in your browser</p>
+        </header>
+
+        <!-- Stats Dashboard -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 style="margin: 0; color: #6b7280;">Total Memos</h3>
+                <p id="total-memos" class="stat-value">0</p>
+            </div>
+            <div class="stat-card">
+                <h3 style="margin: 0; color: #6b7280;">Total Hours</h3>
+                <p id="total-hours" class="stat-value">0</p>
+            </div>
+            <div class="stat-card">
+                <h3 style="margin: 0; color: #6b7280;">This Week</h3>
+                <p id="week-hours" class="stat-value">0h</p>
+            </div>
+            <div class="stat-card">
+                <h3 style="margin: 0; color: #6b7280;">Average/Day</h3>
+                <p id="avg-hours" class="stat-value">0h</p>
+            </div>
+        </div>
+
+        <!-- Add Memo Form -->
+        <div class="card">
+            <h2 style="margin-top: 0;">Add New Memo</h2>
+            
+            <form id="memo-form">
+                <div class="grid grid-cols-2">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" id="memo-date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Time</label>
+                        <input type="time" id="memo-time" class="form-input" required>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2">
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select id="memo-category" class="form-select" required>
+                            <option value="development">Development</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="learning">Learning</option>
+                            <option value="planning">Planning</option>
+                            <option value="testing">Testing</option>
+                            <option value="documentation">Documentation</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Duration (hours)</label>
+                        <input type="number" id="memo-duration" step="0.5" min="0.5" max="12" class="form-input">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Title / Task</label>
+                    <input type="text" id="memo-title" placeholder="What did you work on?" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Description & Learnings</label>
+                    <textarea id="memo-description" rows="4" placeholder="Describe what you did and what you learned..." class="form-textarea" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Tags (optional)</label>
+                    <input type="text" id="memo-tags" placeholder="javascript, react, debugging" class="form-input">
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <button type="button" id="export-btn" class="btn btn-secondary">💾 Export Data</button>
+                        <button type="button" id="clear-all-btn" class="btn btn-secondary">🗑️ Clear All</button>
+                    </div>
+                    <button type="submit" class="btn btn-primary">✅ Add Memo</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Search -->
+        <input type="text" id="search-input" class="search-input" placeholder="🔍 Search your memos...">
+
+        <!-- Memo List -->
+        <div id="memo-list"></div>
+    </div>
+
+    <script>
+        class SimpleTracker {
+            constructor() {
+                this.memos = JSON.parse(localStorage.getItem('offline-memos') || '[]');
+                this.setupEventListeners();
+                this.setDefaultDateTime();
+                this.renderMemos();
+                this.updateStats();
+            }
+
+            setupEventListeners() {
+                document.getElementById('memo-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addMemo();
+                });
+                
+                document.getElementById('export-btn').addEventListener('click', () => this.exportData());
+                document.getElementById('clear-all-btn').addEventListener('click', () => this.clearAll());
+                document.getElementById('search-input').addEventListener('input', (e) => this.searchMemos(e.target.value));
+            }
+
+            setDefaultDateTime() {
+                const now = new Date();
+                document.getElementById('memo-date').value = now.toISOString().split('T')[0];
+                document.getElementById('memo-time').value = now.toTimeString().slice(0, 5);
+            }
+
+            addMemo() {
+                const memo = {
+                    id: Date.now().toString(),
+                    date: document.getElementById('memo-date').value,
+                    time: document.getElementById('memo-time').value,
+                    category: document.getElementById('memo-category').value,
+                    duration: parseFloat(document.getElementById('memo-duration').value) || 0,
+                    title: document.getElementById('memo-title').value,
+                    description: document.getElementById('memo-description').value,
+                    tags: document.getElementById('memo-tags').value.split(',').map(t => t.trim()).filter(t => t)
+                };
+
+                this.memos.unshift(memo);
+                this.saveMemos();
+                this.renderMemos();
+                this.updateStats();
+                this.resetForm();
+                
+                alert('✅ Memo added successfully!');
+            }
+
+            resetForm() {
+                document.getElementById('memo-form').reset();
+                this.setDefaultDateTime();
+            }
+
+            saveMemos() {
+                localStorage.setItem('offline-memos', JSON.stringify(this.memos));
+            }
+
+            renderMemos() {
+                const container = document.getElementById('memo-list');
+                container.innerHTML = '';
+
+                if (this.memos.length === 0) {
+                    container.innerHTML = '<div class="card" style="text-align: center; color: #6b7280;"><p>📝 No memos yet. Add your first memo above!</p></div>';
+                    return;
+                }
+
+                this.memos.forEach(memo => {
+                    const memoEl = document.createElement('div');
+                    memoEl.className = 'memo-card';
+                    memoEl.innerHTML = `
+                        <div class="memo-header">
+                            <div>
+                                <div class="memo-title">${memo.title}</div>
+                                <div class="memo-meta">${memo.date} at ${memo.time} • ${memo.duration}h</div>
+                            </div>
+                            <div>
+                                <span class="badge badge-category">${memo.category}</span>
+                                <button onclick="tracker.deleteMemo('${memo.id}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px;">🗑️</button>
+                            </div>
+                        </div>
+                        <p style="margin: 8px 0; color: #4b5563;">${memo.description}</p>
+                        ${memo.tags.length > 0 ? `<div style="margin-top: 8px;">${memo.tags.map(tag => `<span class="badge" style="background: #f3f4f6; color: #374151;">#${tag}</span>`).join('')}</div>` : ''}
+                    `;
+                    container.appendChild(memoEl);
+                });
+            }
+
+            deleteMemo(id) {
+                if (confirm('Delete this memo?')) {
+                    this.memos = this.memos.filter(memo => memo.id !== id);
+                    this.saveMemos();
+                    this.renderMemos();
+                    this.updateStats();
+                }
+            }
+
+            searchMemos(query) {
+                const filtered = this.memos.filter(memo => 
+                    memo.title.toLowerCase().includes(query.toLowerCase()) ||
+                    memo.description.toLowerCase().includes(query.toLowerCase()) ||
+                    memo.category.toLowerCase().includes(query.toLowerCase()) ||
+                    memo.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+                );
+                
+                this.renderFilteredMemos(filtered);
+            }
+
+            renderFilteredMemos(memos) {
+                const container = document.getElementById('memo-list');
+                container.innerHTML = '';
+
+                if (memos.length === 0) {
+                    container.innerHTML = '<div class="card" style="text-align: center; color: #6b7280;"><p>🔍 No memos match your search.</p></div>';
+                    return;
+                }
+
+                memos.forEach(memo => {
+                    const memoEl = document.createElement('div');
+                    memoEl.className = 'memo-card';
+                    memoEl.innerHTML = `
+                        <div class="memo-header">
+                            <div>
+                                <div class="memo-title">${memo.title}</div>
+                                <div class="memo-meta">${memo.date} at ${memo.time} • ${memo.duration}h</div>
+                            </div>
+                            <span class="badge badge-category">${memo.category}</span>
+                        </div>
+                        <p style="margin: 8px 0; color: #4b5563;">${memo.description}</p>
+                        ${memo.tags.length > 0 ? `<div style="margin-top: 8px;">${memo.tags.map(tag => `<span class="badge" style="background: #f3f4f6; color: #374151;">#${tag}</span>`).join('')}</div>` : ''}
+                    `;
+                    container.appendChild(memoEl);
+                });
+            }
+
+            updateStats() {
+                const totalMemos = this.memos.length;
+                const totalHours = this.memos.reduce((sum, memo) => sum + memo.duration, 0);
+                
+                // Calculate this week's hours
+                const now = new Date();
+                const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+                const weekMemos = this.memos.filter(memo => new Date(memo.date) >= startOfWeek);
+                const weekHours = weekMemos.reduce((sum, memo) => sum + memo.duration, 0);
+                
+                // Calculate average per day
+                const avgHours = totalMemos > 0 ? (totalHours / Math.max(1, new Set(this.memos.map(m => m.date)).size)) : 0;
+                
+                document.getElementById('total-memos').textContent = totalMemos;
+                document.getElementById('total-hours').textContent = totalHours.toFixed(1);
+                document.getElementById('week-hours').textContent = weekHours.toFixed(1) + 'h';
+                document.getElementById('avg-hours').textContent = avgHours.toFixed(1) + 'h';
+            }
+
+            exportData() {
+                const data = JSON.stringify(this.memos, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `internship-memos-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            clearAll() {
+                if (confirm('⚠️ Clear all memos? This cannot be undone!')) {
+                    this.memos = [];
+                    this.saveMemos();
+                    this.renderMemos();
+                    this.updateStats();
+                    alert('🗑️ All memos cleared!');
+                }
+            }
+        }
+
+        // Initialize the tracker
+        const tracker = new SimpleTracker();
+    </script>
+</body>
+</html>

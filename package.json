@@ -1,0 +1,63 @@
+{
+  "name": "internship-progress-tracker",
+  "version": "2.0.0",
+  "description": "A professional web application for tracking daily internship progress, learnings, and achievements",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "npx http-server -p 8000 -c-1",
+    "dev": "npx live-server --port=8000 --no-browser",
+    "build": "echo 'No build process needed - static files only'",
+    "lint": "npx eslint js/**/*.js",
+    "format": "npx prettier --write **/*.{html,css,js,json,md}",
+    "validate": "npx html-validate index.html"
+  },
+  "keywords": [
+    "internship",
+    "progress-tracking",
+    "productivity",
+    "journal",
+    "memo",
+    "learning",
+    "web-app",
+    "firebase",
+    "javascript",
+    "modular"
+  ],
+  "author": "Internship Tracker Team",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^12.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "html-validate": "^8.0.0",
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2",
+    "prettier": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/internship-progress-tracker"
+  },
+  "homepage": "https://yourusername.github.io/internship-progress-tracker",
+  "bugs": {
+    "url": "https://github.com/yourusername/internship-progress-tracker/issues"
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "not dead"
+  ],
+  "files": [
+    "index.html",
+    "css/",
+    "js/",
+    "docs/",
+    "README.md"
+  ]
+}

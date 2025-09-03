@@ -1,0 +1,127 @@
+{
+  "memos": [
+    {
+      "id": "1693747200000",
+      "date": "2025-09-03",
+      "time": "09:00",
+      "category": "planning",
+      "duration": "0.5",
+      "title": "Daily standup and task planning",
+      "description": "# Daily Standup\n\nAttended daily standup meeting with the development team.\n\n## Tasks discussed:\n- User authentication feature implementation\n- Database schema review\n- Sprint planning for next week\n\n## My focus today:\n- Complete login form validation\n- Research JWT authentication best practices\n\n**Key takeaways:** Always plan the day ahead and communicate blockers early.",
+      "tags": "planning, standup, team-meeting",
+      "attachments": [
+        {
+          "name": "standup-notes.txt",
+          "type": "text/plain",
+          "size": 1024,
+          "data": "data:text/plain;base64,IyBTdGFuZHVwIE5vdGVzCgpUZWFtIG1lZXRpbmcgc3VtbWFyeQo=",
+          "lastModified": 1693747200000
+        }
+      ],
+      "createdAt": "2025-09-03T09:00:00.000Z"
+    },
+    {
+      "id": "1693750800000",
+      "date": "2025-09-03",
+      "time": "10:30",
+      "category": "development",
+      "duration": "2.5",
+      "title": "Implemented login form validation",
+      "description": "## Frontend Validation Implementation\n\nWorked on client-side form validation for the login page.\n\n### What I implemented:\n- **Email validation** using regex pattern\n- **Password strength checker** with visual feedback\n- **Real-time validation** as user types\n- **Error message display** with proper styling\n\n### Code highlights:\n```javascript\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nconst isValidEmail = emailRegex.test(email.value);\n```\n\n### Challenges faced:\n- Understanding regex patterns for email validation\n- Handling form state management\n- Ensuring accessibility for error messages\n\n### What I learned:\n- Form validation best practices\n- JavaScript regex patterns\n- UX considerations for form feedback\n\n**Next steps:** Implement server-side validation and error handling.",
+      "tags": "javascript, validation, forms, frontend",
+      "attachments": [
+        {
+          "name": "login-form.js",
+          "type": "application/javascript",
+          "size": 2048,
+          "data": "data:application/javascript;base64,Ly8gTG9naW4gZm9ybSB2YWxpZGF0aW9uIGNvZGU=",
+          "lastModified": 1693750800000
+        },
+        {
+          "name": "form-mockup.png",
+          "type": "image/png",
+          "size": 51200,
+          "data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+          "lastModified": 1693750800000
+        }
+      ],
+      "createdAt": "2025-09-03T10:30:00.000Z"
+    },
+    {
+      "id": "1693761600000",
+      "date": "2025-09-03",
+      "time": "14:00",
+      "category": "learning",
+      "duration": "1.5",
+      "title": "Research on JWT authentication",
+      "description": "## JWT Authentication Deep Dive\n\nSpent time understanding JSON Web Tokens for secure authentication.\n\n### Key concepts learned:\n\n1. **JWT Structure:**\n   - Header (algorithm & token type)\n   - Payload (claims & user data)\n   - Signature (verification)\n\n2. **Security considerations:**\n   - Token expiration times\n   - Refresh token strategy\n   - Storage best practices (httpOnly cookies vs localStorage)\n\n3. **Implementation workflow:**\n   - User login → Server generates JWT\n   - Client stores token\n   - Include token in Authorization header\n   - Server validates token for protected routes\n\n### Resources studied:\n- [JWT.io](https://jwt.io/) - Interactive token debugger\n- MDN Web Docs on authentication\n- Security best practices articles\n\n### Questions for mentor:\n- Should we use httpOnly cookies or localStorage?\n- What's the optimal token expiration time?\n- How to handle token refresh elegantly?\n\n**Tomorrow's goal:** Start implementing JWT authentication on the backend.",
+      "tags": "jwt, security, authentication, learning",
+      "attachments": [
+        {
+          "name": "jwt-research-notes.pdf",
+          "type": "application/pdf",
+          "size": 102400,
+          "data": "data:application/pdf;base64,JVBERi0xLjQKJeLjz9MKMSAwIG9iaiA8PC9UeXBlL0NhdGFsb2c=",
+          "lastModified": 1693761600000
+        }
+      ],
+      "createdAt": "2025-09-03T14:00:00.000Z"
+    },
+    {
+      "id": "1693765200000",
+      "date": "2025-09-03",
+      "time": "16:00",
+      "category": "meeting",
+      "duration": "1",
+      "title": "Code review session with senior developer",
+      "description": "## Code Review Session\n\nHad a productive code review session with Sarah (Senior Developer).\n\n### Code reviewed:\n- Login form validation implementation\n- CSS styling for error states\n- JavaScript form handling logic\n\n### Feedback received:\n\n#### ✅ What went well:\n- Clean, readable code structure\n- Good error message UX\n- Proper separation of concerns\n\n#### 🔧 Areas for improvement:\n- **Performance:** Debounce validation to avoid excessive calls\n- **Accessibility:** Add ARIA labels for screen readers\n- **Security:** Sanitize inputs before processing\n- **Testing:** Add unit tests for validation functions\n\n### Action items:\n1. Implement input debouncing (300ms delay)\n2. Add proper ARIA attributes\n3. Research input sanitization libraries\n4. Write Jest tests for validation logic\n\n### New techniques learned:\n- Using `debounce` function for performance optimization\n- ARIA best practices for form accessibility\n- Code review checklist approach\n\n**Reflection:** Code reviews are incredibly valuable for learning. Getting feedback from experienced developers helps identify blind spots and learn industry best practices.",
+      "tags": "code-review, feedback, accessibility, performance",
+      "attachments": [
+        {
+          "name": "code-review-checklist.pdf",
+          "type": "application/pdf",
+          "size": 76800,
+          "data": "data:application/pdf;base64,JVBERi0xLjQKJeLjz9MKMSAwIG9iaiA8PC9UeXBlL0NhdGFsb2c=",
+          "lastModified": 1693765200000
+        },
+        {
+          "name": "accessibility-notes.txt",
+          "type": "text/plain",
+          "size": 1536,
+          "data": "data:text/plain;base64,QVJJQSBiZXN0IHByYWN0aWNlcyBmb3IgZm9ybXM=",
+          "lastModified": 1693765200000
+        }
+      ],
+      "createdAt": "2025-09-03T16:00:00.000Z"
+    },
+    {
+      "id": "1693768800000",
+      "date": "2025-09-03",
+      "time": "17:30",
+      "category": "documentation",
+      "duration": "0.5",
+      "title": "Updated project documentation",
+      "description": "## Documentation Updates\n\nUpdated the project README and technical documentation.\n\n### Changes made:\n- Added installation instructions for new team members\n- Documented the authentication flow diagram\n- Updated API endpoint documentation\n- Added troubleshooting section for common issues\n\n### Tools used:\n- Markdown for formatting\n- Draw.io for flow diagrams\n- Postman for API documentation\n\n**Learning:** Good documentation is as important as good code. It saves time for everyone on the team.",
+      "tags": "documentation, markdown, readme",
+      "attachments": [
+        {
+          "name": "auth-flow-diagram.png",
+          "type": "image/png",
+          "size": 153600,
+          "data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+          "lastModified": 1693768800000
+        },
+        {
+          "name": "api-documentation.json",
+          "type": "application/json",
+          "size": 4096,
+          "data": "data:application/json;base64,eyJhcGkiOiJkb2N1bWVudGF0aW9uIn0=",
+          "lastModified": 1693768800000
+        }
+      ],
+      "createdAt": "2025-09-03T17:30:00.000Z"
+    }
+  ],
+  "exportDate": "2025-09-03T18:00:00.000Z",
+  "version": "1.0"
+}
