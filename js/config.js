@@ -1,5 +1,6 @@
 // Firebase Configuration
-// Your actual Firebase project configuration
+// These are safe to expose publicly as they're client-side keys
+// For production, consider using environment variables
 export const firebaseConfig = {
     apiKey: "AIzaSyBXyDjhD-uewbVQyfBIGF08sVJ6DTypJPU",
     authDomain: "internship-tracker-v01.firebaseapp.com",
@@ -8,6 +9,10 @@ export const firebaseConfig = {
     messagingSenderId: "33562128425",
     appId: "1:33562128425:web:21084944a8360cf6ecec38"
 };
+
+// NOTE: Firebase client config is safe to be public
+// Your database is protected by Firestore security rules
+// For enhanced security in production, use environment variables
 
 // Application Configuration
 export const appConfig = {
