@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - Internship Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/tasks.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="breadcrumb">
+                        <a href="dashboard.html">Dashboard</a> 
+                        <span class="breadcrumb-separator">></span>
+                        <span>Analytics</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div id="auth-status">
+                        <!-- Auth status will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="analytics-page">
+                <div class="page-header">
+                    <h1>📊 Analytics Dashboard</h1>
+                    <p>Comprehensive overview of your internship progress and task management</p>
+                </div>
+
+                <!-- Overview Stats -->
+                <section class="stats-section">
+                    <h2>📈 Overview</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📝</div>
+                            <div class="stat-content">
+                                <h3 id="total-memos-stat">0</h3>
+                                <p>Total Memos</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📋</div>
+                            <div class="stat-content">
+                                <h3 id="total-tasks-stat">0</h3>
+                                <p>Total Tasks</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏱️</div>
+                            <div class="stat-content">
+                                <h3 id="total-hours-stat">0</h3>
+                                <p>Hours Logged</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🗓️</div>
+                            <div class="stat-content">
+                                <h3 id="active-days-stat">0</h3>
+                                <p>Active Days</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Task Analytics -->
+                <section class="task-analytics-section">
+                    <h2>📊 Task Analytics</h2>
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>Task Completion Rate</h3>
+                            <div class="completion-chart">
+                                <div class="circular-progress">
+                                    <svg width="120" height="120">
+                                        <circle cx="60" cy="60" r="50" stroke="#e9ecef" stroke-width="10" fill="transparent"/>
+                                        <circle cx="60" cy="60" r="50" stroke="#28a745" stroke-width="10" fill="transparent"
+                                                stroke-dasharray="314" stroke-dashoffset="314" id="progress-circle"/>
+                                    </svg>
+                                    <div class="progress-percentage" id="completion-percentage">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-card">
+                            <h3>Tasks by Status</h3>
+                            <div class="status-breakdown">
+                                <div class="status-item">
+                                    <span class="status-color todo"></span>
+                                    <span class="status-label">To Do</span>
+                                    <span class="status-count" id="todo-status-count">0</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-color in-progress"></span>
+                                    <span class="status-label">In Progress</span>
+                                    <span class="status-count" id="in-progress-status-count">0</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-color done"></span>
+                                    <span class="status-label">Completed</span>
+                                    <span class="status-count" id="done-status-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-card">
+                            <h3>Tasks by Priority</h3>
+                            <div class="priority-breakdown">
+                                <div class="priority-item">
+                                    <span class="priority-color critical"></span>
+                                    <span class="priority-label">Critical</span>
+                                    <span class="priority-count" id="critical-priority-count">0</span>
+                                </div>
+                                <div class="priority-item">
+                                    <span class="priority-color high"></span>
+                                    <span class="priority-label">High</span>
+                                    <span class="priority-count" id="high-priority-count">0</span>
+                                </div>
+                                <div class="priority-item">
+                                    <span class="priority-color medium"></span>
+                                    <span class="priority-label">Medium</span>
+                                    <span class="priority-count" id="medium-priority-count">0</span>
+                                </div>
+                                <div class="priority-item">
+                                    <span class="priority-color low"></span>
+                                    <span class="priority-label">Low</span>
+                                    <span class="priority-count" id="low-priority-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-card">
+                            <h3>Category Distribution</h3>
+                            <div class="category-breakdown" id="category-breakdown">
+                                <!-- Categories will be populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Progress Timeline -->
+                <section class="timeline-section">
+                    <h2>📅 Weekly Progress</h2>
+                    <div class="timeline-chart">
+                        <div class="timeline-header">
+                            <span>Week</span>
+                            <span>Memos</span>
+                            <span>Tasks</span>
+                            <span>Hours</span>
+                        </div>
+                        <div id="weekly-timeline">
+                            <!-- Weekly data will be populated here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Activity Heatmap -->
+                <section class="heatmap-section">
+                    <h2>🔥 Activity Heatmap</h2>
+                    <div class="heatmap-container">
+                        <p class="heatmap-description">Daily activity over the past 12 weeks</p>
+                        <div class="heatmap-grid" id="activity-heatmap">
+                            <!-- Heatmap will be generated here -->
+                        </div>
+                        <div class="heatmap-legend">
+                            <span>Less</span>
+                            <div class="legend-colors">
+                                <div class="legend-color level-0"></div>
+                                <div class="legend-color level-1"></div>
+                                <div class="legend-color level-2"></div>
+                                <div class="legend-color level-3"></div>
+                                <div class="legend-color level-4"></div>
+                            </div>
+                            <span>More</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { authService } from './js/services/auth-service.js';
+        import { storageService } from './js/services/storage-service.js';
+        import { taskService } from './js/services/task-service.js';
+        import { authUI } from './js/components/auth-ui.js';
+
+        class AnalyticsDashboard {
+            constructor() {
+                this.memos = [];
+                this.tasks = [];
+                this.isInitialized = false;
+            }
+
+            async initialize() {
+                try {
+                    // Initialize auth
+                    await authService.initialize();
+                    
+                    // Setup auth UI
+                    authUI.setupAuthUI();
+                    
+                    // Check authentication
+                    if (!authService.isAuthenticated) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    // Initialize services
+                    await storageService.initialize(authService);
+                    await taskService.initialize();
+
+                    // Load data
+                    await this.loadData();
+                    
+                    // Render analytics
+                    this.renderAnalytics();
+                    
+                    this.isInitialized = true;
+                    console.log('Analytics dashboard initialized');
+                    
+                } catch (error) {
+                    console.error('Failed to initialize analytics dashboard:', error);
+                    this.showError('Failed to load analytics data');
+                }
+            }
+
+            async loadData() {
+                try {
+                    // Load memos
+                    this.memos = await storageService.getAllMemos() || [];
+                    
+                    // Load tasks
+                    this.tasks = await taskService.getTasks() || [];
+                    
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                }
+            }
+
+            renderAnalytics() {
+                this.renderOverviewStats();
+                this.renderTaskAnalytics();
+                this.renderWeeklyProgress();
+                this.renderActivityHeatmap();
+            }
+
+            renderOverviewStats() {
+                // Calculate stats
+                const totalMemos = this.memos.length;
+                const totalTasks = this.tasks.length;
+                const totalHours = this.memos.reduce((sum, memo) => sum + (parseFloat(memo.duration) || 0), 0);
+                const activeDays = new Set(this.memos.map(memo => memo.date)).size;
+
+                // Update DOM
+                document.getElementById('total-memos-stat').textContent = totalMemos;
+                document.getElementById('total-tasks-stat').textContent = totalTasks;
+                document.getElementById('total-hours-stat').textContent = Math.round(totalHours);
+                document.getElementById('active-days-stat').textContent = activeDays;
+            }
+
+            renderTaskAnalytics() {
+                if (this.tasks.length === 0) return;
+
+                // Task completion rate
+                const completedTasks = this.tasks.filter(task => task.status === 'done').length;
+                const completionRate = Math.round((completedTasks / this.tasks.length) * 100);
+                
+                document.getElementById('completion-percentage').textContent = completionRate + '%';
+                
+                // Update progress circle
+                const circle = document.getElementById('progress-circle');
+                const circumference = 314;
+                const offset = circumference - (completionRate / 100) * circumference;
+                circle.style.strokeDashoffset = offset;
+
+                // Status breakdown
+                const statusCounts = this.tasks.reduce((acc, task) => {
+                    acc[task.status] = (acc[task.status] || 0) + 1;
+                    return acc;
+                }, {});
+
+                document.getElementById('todo-status-count').textContent = statusCounts['todo'] || 0;
+                document.getElementById('in-progress-status-count').textContent = statusCounts['in-progress'] || 0;
+                document.getElementById('done-status-count').textContent = statusCounts['done'] || 0;
+
+                // Priority breakdown
+                const priorityCounts = this.tasks.reduce((acc, task) => {
+                    acc[task.priority] = (acc[task.priority] || 0) + 1;
+                    return acc;
+                }, {});
+
+                document.getElementById('critical-priority-count').textContent = priorityCounts['critical'] || 0;
+                document.getElementById('high-priority-count').textContent = priorityCounts['high'] || 0;
+                document.getElementById('medium-priority-count').textContent = priorityCounts['medium'] || 0;
+                document.getElementById('low-priority-count').textContent = priorityCounts['low'] || 0;
+
+                // Category breakdown
+                this.renderCategoryBreakdown();
+            }
+
+            renderCategoryBreakdown() {
+                const categoryCounts = this.tasks.reduce((acc, task) => {
+                    acc[task.category] = (acc[task.category] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const container = document.getElementById('category-breakdown');
+                container.innerHTML = '';
+
+                Object.entries(categoryCounts).forEach(([category, count]) => {
+                    const categoryItem = document.createElement('div');
+                    categoryItem.className = 'category-item';
+                    categoryItem.innerHTML = `
+                        <span class="category-label">${category}</span>
+                        <span class="category-count">${count}</span>
+                    `;
+                    container.appendChild(categoryItem);
+                });
+            }
+
+            renderWeeklyProgress() {
+                const weeks = this.getWeeklyData();
+                const container = document.getElementById('weekly-timeline');
+                container.innerHTML = '';
+
+                weeks.forEach((week, index) => {
+                    const weekItem = document.createElement('div');
+                    weekItem.className = 'week-item';
+                    weekItem.innerHTML = `
+                        <span class="week-label">Week ${index + 1}</span>
+                        <span class="week-memos">${week.memos}</span>
+                        <span class="week-tasks">${week.tasks}</span>
+                        <span class="week-hours">${week.hours}h</span>
+                    `;
+                    container.appendChild(weekItem);
+                });
+            }
+
+            renderActivityHeatmap() {
+                const heatmapData = this.generateHeatmapData();
+                const container = document.getElementById('activity-heatmap');
+                container.innerHTML = '';
+
+                heatmapData.forEach(day => {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = `heatmap-day level-${day.level}`;
+                    dayCell.title = `${day.date}: ${day.activities} activities`;
+                    container.appendChild(dayCell);
+                });
+            }
+
+            getWeeklyData() {
+                // Generate weekly data for the past 8 weeks
+                const weeks = [];
+                const now = new Date();
+                
+                for (let i = 7; i >= 0; i--) {
+                    const weekStart = new Date(now);
+                    weekStart.setDate(weekStart.getDate() - (i * 7));
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekEnd.getDate() + 6);
+
+                    const weekMemos = this.memos.filter(memo => {
+                        const memoDate = new Date(memo.date);
+                        return memoDate >= weekStart && memoDate <= weekEnd;
+                    });
+
+                    const weekTasks = this.tasks.filter(task => {
+                        const taskDate = new Date(task.createdAt);
+                        return taskDate >= weekStart && taskDate <= weekEnd;
+                    });
+
+                    weeks.push({
+                        memos: weekMemos.length,
+                        tasks: weekTasks.length,
+                        hours: Math.round(weekMemos.reduce((sum, memo) => sum + (parseFloat(memo.duration) || 0), 0))
+                    });
+                }
+
+                return weeks;
+            }
+
+            generateHeatmapData() {
+                const days = [];
+                const now = new Date();
+                const startDate = new Date(now);
+                startDate.setDate(startDate.getDate() - 84); // 12 weeks
+
+                for (let i = 0; i < 84; i++) {
+                    const date = new Date(startDate);
+                    date.setDate(date.getDate() + i);
+                    
+                    const dateString = date.toISOString().split('T')[0];
+                    const dayMemos = this.memos.filter(memo => memo.date === dateString).length;
+                    const dayTasks = this.tasks.filter(task => {
+                        const taskDate = task.createdAt ? new Date(task.createdAt).toISOString().split('T')[0] : null;
+                        return taskDate === dateString;
+                    }).length;
+
+                    const activities = dayMemos + dayTasks;
+                    const level = Math.min(Math.floor(activities / 2), 4);
+
+                    days.push({
+                        date: dateString,
+                        activities,
+                        level
+                    });
+                }
+
+                return days;
+            }
+
+            showError(message) {
+                console.error(message);
+                // You could show a toast notification here
+            }
+        }
+
+        // Initialize the dashboard
+        const dashboard = new AnalyticsDashboard();
+        dashboard.initialize();
+    </script>
+
+    <style>
+        /* Analytics Page Specific Styles */
+        .analytics-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+
+        .page-header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .stats-section,
+        .task-analytics-section,
+        .timeline-section,
+        .heatmap-section {
+            margin-bottom: 40px;
+        }
+
+        .stats-section h2,
+        .task-analytics-section h2,
+        .timeline-section h2,
+        .heatmap-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 8px;
+        }
+
+        /* Completion Rate Circle */
+        .completion-chart {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .circular-progress {
+            position: relative;
+        }
+
+        .progress-percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        /* Status/Priority Breakdown */
+        .status-breakdown,
+        .priority-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .status-item,
+        .priority-item,
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .status-color,
+        .priority-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-color.todo { background: #6c757d; }
+        .status-color.in-progress { background: #ffc107; }
+        .status-color.done { background: #28a745; }
+
+        .priority-color.critical { background: #dc3545; }
+        .priority-color.high { background: #fd7e14; }
+        .priority-color.medium { background: #ffc107; }
+        .priority-color.low { background: #28a745; }
+
+        /* Timeline */
+        .timeline-chart {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .timeline-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 20px;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .week-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 20px;
+            padding: 12px 20px;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        /* Activity Heatmap */
+        .heatmap-container {
+            text-align: center;
+        }
+
+        .heatmap-description {
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2px;
+            max-width: 600px;
+            margin: 0 auto 15px auto;
+        }
+
+        .heatmap-day {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .heatmap-day.level-0 { background: #ebedf0; }
+        .heatmap-day.level-1 { background: #c6e48b; }
+        .heatmap-day.level-2 { background: #7bc96f; }
+        .heatmap-day.level-3 { background: #239a3b; }
+        .heatmap-day.level-4 { background: #196127; }
+
+        .heatmap-legend {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .legend-colors {
+            display: flex;
+            gap: 2px;
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 1px;
+        }
+
+        .legend-color.level-0 { background: #ebedf0; }
+        .legend-color.level-1 { background: #c6e48b; }
+        .legend-color.level-2 { background: #7bc96f; }
+        .legend-color.level-3 { background: #239a3b; }
+        .legend-color.level-4 { background: #196127; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline-header,
+            .week-item {
+                grid-template-columns: 2fr 1fr 1fr 1fr;
+                font-size: 0.9rem;
+            }
+            
+            .heatmap-grid {
+                grid-template-columns: repeat(7, 1fr);
+            }
+        }
+    </style>
+</body>
+</html>
