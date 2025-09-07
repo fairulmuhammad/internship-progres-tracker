@@ -47,9 +47,23 @@ class AuthService {
             await authModule.setPersistence(this.auth, authModule.browserLocalPersistence);
             
             // Listen for auth state changes
-            authModule.onAuthStateChanged(this.auth, (user) => {
+            authModule.onAuthStateChanged(this.auth, async (user) => {
                 this.currentUser = user;
                 this.handleAuthStateChange(user);
+                
+                // Initialize task service if user is authenticated
+                if (user) {
+                    try {
+                        const { initializeTaskService } = await import('./task-service.js');
+                        const taskService = initializeTaskService(this);
+                        await taskService.initialize();
+                        console.log('Task service initialized for user:', user.email);
+                    } catch (error) {
+                        // Task service is optional - don't fail auth if it's not available
+                        console.log('Task service not available:', error.message);
+                    }
+                }
+                
                 this.authStateCallbacks.forEach(callback => callback(user));
             });
             
