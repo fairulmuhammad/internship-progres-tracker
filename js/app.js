@@ -1,6 +1,6 @@
-// Main Application Controller
+// Main Application Controller - Enhanced with user authentication
 import { appConfig } from './config.js';
-import { storageService } from './storage.js';
+import { storageService } from './services/storage-service.js';
 import { fileService } from './file-service.js';
 import { uiComponents, StatsCalculator, FormValidator } from './ui-components.js';
 import { authService } from './services/auth-service.js';
@@ -12,6 +12,9 @@ class InternshipTracker {
         this.filteredMemos = [];
         this.currentEditId = null;
         this.currentFiles = [];
+        
+        // Initialize auth UI
+        this.authUI = authUI;
         
         // DOM elements
         this.elements = {};
@@ -26,7 +29,7 @@ class InternshipTracker {
         this.handleDataChange = this.handleDataChange.bind(this);
     }
 
-    // Initialize the application
+    // Initialize the application with authentication
     async initialize() {
         try {
             // Show loading
@@ -38,17 +41,20 @@ class InternshipTracker {
             // Setup event listeners
             this.setupEventListeners();
             
-            // Initialize services
-            await storageService.initialize();
+            // Initialize auth service first
+            await authService.initialize();
             
-            // Setup data listener and load initial data
+            // Initialize storage service with auth
+            await storageService.initialize(authService);
+            
+            // Setup data listener for real-time updates
             storageService.onDataChange(this.handleDataChange);
             
-            // Force initial data load for local storage
-            if (appConfig.USE_LOCAL_STORAGE) {
-                const existingMemos = await this.loadInitialData();
-                this.handleDataChange(existingMemos);
-            }
+            // Load user's memos (will be empty for new users)
+            await this.loadUserData();
+            
+            // Check if this is a new user and offer migration
+            await this.checkForDataMigration();
             
             // Update storage status indicator
             this.updateStorageStatusIndicator();
@@ -59,10 +65,14 @@ class InternshipTracker {
             // Hide loading
             this.hideLoading();
             
+            // Show welcome message for new users
+            this.showWelcomeMessageIfNeeded();
+            
             console.log('Internship Tracker initialized successfully');
             
         } catch (error) {
-            console.error('Failed to initialize application:', error);
+            console.error('Failed to initialize app:', error);
+            this.hideLoading();
             this.showError('Failed to initialize application. Please refresh and try again.');
         }
     }
@@ -128,19 +138,19 @@ class InternshipTracker {
     // Setup all event listeners
     setupEventListeners() {
         // Form submission
-        this.elements.form.addEventListener('submit', this.handleFormSubmit);
+        this.elements.form.addEventListener('submit', this.handleFormSubmit.bind(this));
         
         // File handling
-        this.elements.memoFiles.addEventListener('change', this.handleFileSelection);
+        this.elements.memoFiles.addEventListener('change', this.handleFileSelection.bind(this));
         
         // Search and filters
         this.elements.searchBar.addEventListener('input', 
-            uiComponents.debounce(this.handleSearch, 300));
-        this.elements.categoryFilter.addEventListener('change', this.handleCategoryFilter);
-        this.elements.dateFilter.addEventListener('change', this.handleDateFilter);
+            uiComponents.debounce(this.handleSearch.bind(this), 300));
+        this.elements.categoryFilter.addEventListener('change', this.handleCategoryFilter.bind(this));
+        this.elements.dateFilter.addEventListener('change', this.handleDateFilter.bind(this));
         
         // Memo actions
-        this.elements.memoList.addEventListener('click', this.handleMemoAction);
+        this.elements.memoList.addEventListener('click', this.handleMemoAction.bind(this));
         
         // Form actions
         this.elements.cancelEditBtn.addEventListener('click', () => this.resetForm());
@@ -150,12 +160,17 @@ class InternshipTracker {
         this.elements.importBtn.addEventListener('click', () => this.elements.importFile.click());
         this.elements.importFile.addEventListener('change', (e) => this.importData(e));
         
+        // Settings button
+        if (this.elements.toggleStorage) {
+            this.elements.toggleStorage.addEventListener('click', () => this.showSettingsPanel());
+        }
+        
         // Authentication buttons
         const loginBtn = document.getElementById('login-btn');
         const signupBtn = document.getElementById('signup-btn');
         
         if (loginBtn) {
-            loginBtn.addEventListener('click', () => authUI.showLoginModal());
+            loginBtn.addEventListener('click', () => this.authUI.showLoginModal());
         }
     }
 
@@ -194,7 +209,7 @@ class InternshipTracker {
                 await storageService.updateMemo(this.currentEditId, memoData);
                 uiComponents.showNotification('Memo updated successfully!', 'success');
             } else {
-                await storageService.addMemo(memoData);
+                await storageService.saveMemo(memoData);
                 uiComponents.showNotification('Memo added successfully!', 'success');
             }
             
@@ -508,23 +523,19 @@ class InternshipTracker {
         const actions = document.createElement('div');
         actions.className = 'memo-actions';
         
-        const editBtn = uiComponents.createActionButton(
-            'Edit memo',
-            null,
-            'btn-secondary',
-            '<svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>'
-        );
-        editBtn.className += ' edit-btn';
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-icon-only btn-secondary edit-btn';
+        editBtn.setAttribute('aria-label', 'Edit memo');
         editBtn.dataset.id = memo.id;
+        editBtn.title = 'Edit memo';
+        editBtn.innerHTML = '✏️';
         
-        const deleteBtn = uiComponents.createActionButton(
-            'Delete memo',
-            null,
-            'btn-danger',
-            '<svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>'
-        );
-        deleteBtn.className += ' delete-btn';
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-icon-only btn-danger delete-btn';
+        deleteBtn.setAttribute('aria-label', 'Delete memo');
         deleteBtn.dataset.id = memo.id;
+        deleteBtn.title = 'Delete memo';
+        deleteBtn.innerHTML = '🗑️';
         
         actions.appendChild(editBtn);
         actions.appendChild(deleteBtn);
@@ -774,6 +785,371 @@ class InternshipTracker {
             reader.readAsText(file);
         });
     }
+
+    // Load user's memos from Firestore
+    async loadUserData() {
+        try {
+            this.showLoading('Loading your memos...');
+            const userMemos = await storageService.loadMemos();
+            this.handleDataChange(userMemos);
+            this.hideLoading();
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            this.hideLoading();
+            this.showError('Failed to load your memos. Please refresh and try again.');
+        }
+    }
+
+    // Check if user needs data migration from localStorage
+    async checkForDataMigration() {
+        try {
+            // Check if user has existing cloud data
+            const hasCloudData = await storageService.hasExistingData();
+            
+            // Check if there's local data to migrate
+            const localData = this.loadLocalStorageData();
+            
+            if (!hasCloudData && localData.length > 0) {
+                // Show migration dialog
+                this.showMigrationDialog(localData.length);
+            }
+        } catch (error) {
+            console.error('Error checking for data migration:', error);
+        }
+    }
+
+    // Load data from localStorage for migration
+    loadLocalStorageData() {
+        try {
+            const data = localStorage.getItem('memos');
+            return data ? JSON.parse(data) : [];
+        } catch (error) {
+            console.error('Error loading localStorage data:', error);
+            return [];
+        }
+    }
+
+    // Show migration dialog
+    showMigrationDialog(localMemoCount) {
+        const dialog = document.createElement('div');
+        dialog.className = 'migration-dialog-overlay';
+        dialog.innerHTML = `
+            <div class="migration-dialog">
+                <h3>📦 Import Your Data</h3>
+                <p>We found ${localMemoCount} memo(s) in your browser storage. Would you like to import them to your cloud account?</p>
+                <div class="dialog-buttons">
+                    <button id="migrate-yes" class="btn btn-primary">Yes, Import My Data</button>
+                    <button id="migrate-no" class="btn btn-secondary">Skip for Now</button>
+                    <button id="migrate-never" class="btn btn-secondary">Don't Ask Again</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(dialog);
+
+        // Handle migration choices
+        document.getElementById('migrate-yes').onclick = async () => {
+            try {
+                this.showLoading('Migrating your data...');
+                const result = await storageService.migrateLocalDataToCloud();
+                this.hideLoading();
+                
+                if (result.migrated > 0) {
+                    this.showSuccess(`Successfully imported ${result.migrated} memo(s) to your cloud account!`);
+                }
+                
+                dialog.remove();
+            } catch (error) {
+                this.hideLoading();
+                this.showError('Failed to migrate data. Please try again later.');
+                console.error('Migration error:', error);
+            }
+        };
+
+        document.getElementById('migrate-no').onclick = () => {
+            dialog.remove();
+        };
+
+        document.getElementById('migrate-never').onclick = () => {
+            localStorage.setItem('skipMigration', 'true');
+            dialog.remove();
+        };
+    }
+
+    // Show welcome message for new users
+    showWelcomeMessageIfNeeded() {
+        if (this.memos.length === 0) {
+            const welcomeMessage = document.createElement('div');
+            welcomeMessage.className = 'welcome-message';
+            welcomeMessage.innerHTML = `
+                <div class="welcome-content">
+                    <h2>🎉 Welcome to Your Internship Journal!</h2>
+                    <p>Start documenting your journey by creating your first memo. Track your progress, learnings, and achievements!</p>
+                    <button class="btn btn-primary" onclick="this.parentElement.parentElement.style.display='none'">Get Started</button>
+                </div>
+            `;
+            
+            const container = document.querySelector('.container');
+            if (container) {
+                container.insertBefore(welcomeMessage, container.firstChild.nextSibling);
+            }
+        }
+    }
+
+    // Show settings panel
+    showSettingsPanel() {
+        const settingsOverlay = this.createSettingsOverlay();
+        document.body.appendChild(settingsOverlay);
+        
+        // Setup settings panel event listeners
+        this.setupSettingsEventListeners(settingsOverlay);
+    }
+
+    // Create settings panel overlay
+    createSettingsOverlay() {
+        const user = authService.getCurrentUser();
+        const userInfo = authService.getUserInfo();
+        const storageInfo = storageService.getStorageInfo();
+        const sessionInfo = authService.getSessionInfo();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'settings-overlay';
+        overlay.innerHTML = `
+            <div class="settings-panel">
+                <div class="settings-header">
+                    <h2>⚙️ Settings</h2>
+                    <button class="close-settings" aria-label="Close settings">&times;</button>
+                </div>
+                
+                <div class="settings-content">
+                    <!-- Account Information -->
+                    <div class="settings-section">
+                        <h3>👤 Account Information</h3>
+                        <div class="setting-item">
+                            <label>Email:</label>
+                            <span>${userInfo?.email || 'Not available'}</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>Display Name:</label>
+                            <span>${userInfo?.displayName || 'Not set'}</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>Account Created:</label>
+                            <span>${userInfo?.createdAt ? new Date(userInfo.createdAt).toLocaleDateString() : 'Not available'}</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>Last Login:</label>
+                            <span>${userInfo?.lastLogin ? new Date(userInfo.lastLogin).toLocaleDateString() : 'Not available'}</span>
+                        </div>
+                    </div>
+
+                    <!-- Storage & Sync -->
+                    <div class="settings-section">
+                        <h3>☁️ Storage & Sync</h3>
+                        <div class="setting-item">
+                            <label>Storage Mode:</label>
+                            <span>Cloud Storage (Firebase)</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>Sync Status:</label>
+                            <span class="sync-indicator ${storageInfo.syncStatus}">${this.getSyncStatusText(storageInfo.syncStatus)}</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>User ID:</label>
+                            <span class="user-id">${userInfo?.uid?.substring(0, 12) || 'Not available'}...</span>
+                        </div>
+                    </div>
+
+                    <!-- Session Information -->
+                    <div class="settings-section">
+                        <h3>🕐 Session Information</h3>
+                        <div class="setting-item">
+                            <label>Session Duration:</label>
+                            <span>${sessionInfo?.sessionDuration || 0} minutes</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>Time Until Expiry:</label>
+                            <span>${sessionInfo?.timeUntilExpiry || 0} minutes</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>Last Activity:</label>
+                            <span>${sessionInfo?.lastActivity ? sessionInfo.lastActivity.toLocaleTimeString() : 'Unknown'}</span>
+                        </div>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="settings-section">
+                        <h3>📊 Data Management</h3>
+                        <div class="setting-actions">
+                            <button class="btn btn-secondary" id="refresh-data">🔄 Refresh Data</button>
+                            <button class="btn btn-secondary" id="export-settings">📤 Export Data</button>
+                            <button class="btn btn-secondary" id="clear-cache">🗑️ Clear Cache</button>
+                        </div>
+                    </div>
+
+                    <!-- Security -->
+                    <div class="settings-section">
+                        <h3>🔒 Security</h3>
+                        <div class="setting-actions">
+                            <button class="btn btn-secondary" id="change-password">🔑 Change Password</button>
+                            <button class="btn btn-secondary" id="extend-session">⏰ Extend Session</button>
+                            <button class="btn btn-error" id="sign-out-all">🚪 Sign Out</button>
+                        </div>
+                    </div>
+
+                    <!-- About -->
+                    <div class="settings-section">
+                        <h3>ℹ️ About</h3>
+                        <div class="setting-item">
+                            <label>App Version:</label>
+                            <span>2.0.0 (Authentication)</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>Last Updated:</label>
+                            <span>September 2025</span>
+                        </div>
+                        <div class="about-links">
+                            <a href="https://github.com/fairulmuhammad/internship-progres-tracker" target="_blank" class="btn btn-link">📂 GitHub</a>
+                            <a href="https://fairulmuhammad.github.io/internship-progres-tracker/" target="_blank" class="btn btn-link">🌐 Live Demo</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        return overlay;
+    }
+
+    // Setup settings panel event listeners
+    setupSettingsEventListeners(overlay) {
+        // Close button
+        const closeBtn = overlay.querySelector('.close-settings');
+        closeBtn.addEventListener('click', () => {
+            overlay.remove();
+        });
+
+        // Click outside to close
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.remove();
+            }
+        });
+
+        // Settings actions
+        const refreshBtn = overlay.querySelector('#refresh-data');
+        const exportBtn = overlay.querySelector('#export-settings');
+        const clearCacheBtn = overlay.querySelector('#clear-cache');
+        const changePasswordBtn = overlay.querySelector('#change-password');
+        const extendSessionBtn = overlay.querySelector('#extend-session');
+        const signOutBtn = overlay.querySelector('#sign-out-all');
+
+        // Refresh data
+        refreshBtn?.addEventListener('click', async () => {
+            try {
+                this.showLoading('Refreshing data...');
+                await this.loadUserData();
+                this.hideLoading();
+                uiComponents.showNotification('Data refreshed successfully!', 'success');
+                overlay.remove();
+            } catch (error) {
+                this.hideLoading();
+                uiComponents.showNotification('Failed to refresh data', 'error');
+            }
+        });
+
+        // Export data
+        exportBtn?.addEventListener('click', () => {
+            this.exportData();
+            overlay.remove();
+        });
+
+        // Clear cache
+        clearCacheBtn?.addEventListener('click', () => {
+            uiComponents.showConfirmDialog(
+                'Clear browser cache? This will remove temporary data but keep your cloud memos safe.',
+                () => {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    uiComponents.showNotification('Cache cleared successfully!', 'success');
+                    overlay.remove();
+                }
+            );
+        });
+
+        // Change password
+        changePasswordBtn?.addEventListener('click', () => {
+            this.showChangePasswordDialog();
+            overlay.remove();
+        });
+
+        // Extend session
+        extendSessionBtn?.addEventListener('click', () => {
+            authService.handleUserActivity(); // Reset activity timer
+            uiComponents.showNotification('Session extended successfully!', 'success');
+            overlay.remove();
+        });
+
+        // Sign out
+        signOutBtn?.addEventListener('click', () => {
+            uiComponents.showConfirmDialog(
+                'Are you sure you want to sign out? Make sure all your changes are saved.',
+                async () => {
+                    try {
+                        await authService.signOut();
+                    } catch (error) {
+                        console.error('Sign out error:', error);
+                    }
+                }
+            );
+        });
+    }
+
+    // Get sync status text
+    getSyncStatusText(status) {
+        switch (status) {
+            case 'connected': return '✅ Connected';
+            case 'syncing': return '🔄 Syncing';
+            case 'error': return '⚠️ Error';
+            case 'disconnected': return '❌ Disconnected';
+            default: return '❓ Unknown';
+        }
+    }
+
+    // Show change password dialog
+    showChangePasswordDialog() {
+        const user = authService.getCurrentUser();
+        
+        if (!user) {
+            uiComponents.showNotification('You must be logged in to change password', 'error');
+            return;
+        }
+
+        // For Google users, redirect to Google account settings
+        if (user.providerData?.[0]?.providerId === 'google.com') {
+            uiComponents.showConfirmDialog(
+                'To change your password, you need to update it in your Google account. Open Google Account settings?',
+                () => {
+                    window.open('https://myaccount.google.com/security', '_blank');
+                }
+            );
+            return;
+        }
+
+        // For email/password users, show reset password option
+        uiComponents.showConfirmDialog(
+            'We will send a password reset email to your registered email address. Continue?',
+            async () => {
+                try {
+                    await authService.resetPassword(user.email);
+                    uiComponents.showNotification('Password reset email sent! Check your inbox.', 'success');
+                } catch (error) {
+                    console.error('Password reset error:', error);
+                    uiComponents.showNotification('Failed to send password reset email', 'error');
+                }
+            }
+        );
+    }
+
 }
 
 // Initialize application when DOM is loaded

@@ -140,8 +140,73 @@
     border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 14px;
+    color: #374151 !important;
     transition: all 0.15s ease;
-    background-color: #ffffff;
+    background-color: #ffffff !important;
+}
+
+.form-input::placeholder {
+    color: #9ca3af !important;
+    opacity: 1;
+}
+
+/* Force text visibility for all input types */
+.auth-modal input[type="email"],
+.auth-modal input[type="password"],
+.auth-modal input[type="text"] {
+    color: #374151 !important;
+    background-color: #ffffff !important;
+}
+
+.auth-modal input[type="email"]::placeholder,
+.auth-modal input[type="password"]::placeholder,
+.auth-modal input[type="text"]::placeholder {
+    color: #9ca3af !important;
+    opacity: 1 !important;
+}
+
+/* Additional override for any form elements inside auth modal */
+.auth-modal-content input,
+.auth-modal-content .form-input,
+.auth-form input,
+.auth-form .form-input {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+}
+
+.auth-modal-content input::placeholder,
+.auth-modal-content .form-input::placeholder,
+.auth-form input::placeholder,
+.auth-form .form-input::placeholder {
+    color: #6b7280 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #6b7280 !important;
+}
+
+/* Specific overrides for individual input IDs */
+#login-email,
+#login-password,
+#signup-name,
+#signup-email,
+#signup-password,
+#signup-confirm,
+#forgot-email {
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #111827 !important;
+}
+
+#login-email::placeholder,
+#login-password::placeholder,
+#signup-name::placeholder,
+#signup-email::placeholder,
+#signup-password::placeholder,
+#signup-confirm::placeholder,
+#forgot-email::placeholder {
+    color: #6b7280 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #6b7280 !important;
 }
 
 .form-input:focus {
@@ -614,4 +679,22 @@
     .dropdown-item.text-error:hover {
         background-color: #7f1d1d;
     }
+}
+
+/* FINAL OVERRIDE - Force visible text in all auth inputs */
+.auth-modal-overlay input,
+.auth-modal-overlay input.form-input,
+.auth-modal-overlay textarea {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #000000 !important;
+    text-shadow: none !important;
+}
+
+.auth-modal-overlay input::placeholder,
+.auth-modal-overlay input.form-input::placeholder,
+.auth-modal-overlay textarea::placeholder {
+    color: #666666 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #666666 !important;
 }

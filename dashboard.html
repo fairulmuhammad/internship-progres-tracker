@@ -36,6 +36,9 @@
                 <span id="sync-status" class="sync-status hidden">🔄 Syncing...</span>
                 <button id="toggle-storage" class="btn btn-secondary btn-sm">⚙️ Settings</button>
             </div>
+            
+            <!-- Session Status Component -->
+            <div id="session-status-container"></div>
         </header>
 
         <!-- Add Memo Form -->
@@ -202,18 +205,22 @@
     <!-- Authentication Protection -->
     <script type="module">
         import { authService } from './js/services/auth-service.js';
-        import { authUI } from './js/components/auth-ui.js';
+        import { AuthUI } from './js/components/auth-ui.js';
+        import { SessionStatus } from './js/components/session-status.js';
         
         // Initialize auth and protect dashboard
         async function initializeDashboard() {
             try {
                 await authService.initialize();
                 
+                const authUI = new AuthUI(authService);
+                let sessionStatus = null;
+                
                 // Check if user is authenticated
                 authService.onAuthStateChanged((user) => {
                     if (!user) {
                         // Not authenticated, redirect to login
-                        window.location.href = '/login.html';
+                        window.location.href = './login.html';
                         return;
                     }
                     
@@ -225,6 +232,12 @@
                             userSection.innerHTML = '';
                             userSection.appendChild(userProfile);
                         }
+                    }
+                    
+                    // Initialize session status component
+                    if (!sessionStatus) {
+                        sessionStatus = new SessionStatus(authService);
+                        sessionStatus.render('session-status-container');
                     }
                     
                     // Update storage status for authenticated user

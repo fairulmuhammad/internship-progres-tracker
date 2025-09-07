@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            color: #333;
+            background: white;
+            width: 300px;
+            margin: 0.5rem 0;
+            display: block;
+        }
+        input::placeholder {
+            color: #999;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0.5rem 0;
+        }
+        button:hover {
+            background: #3367d6;
+        }
+        #debug {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Authentication Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Input Field Test</h2>
+        <p>Test if you can see the text you type:</p>
+        <input type="text" placeholder="Type here to test visibility..." id="testInput">
+        <p>Text content: <span id="textDisplay">Type something above</span></p>
+    </div>
+
+    <div class="test-section">
+        <h2>Google Sign-in Test</h2>
+        <button onclick="testGoogleSignIn()">Test Google Sign-in</button>
+        <div id="debug"></div>
+    </div>
+
+    <script type="module">
+        // Test input visibility
+        const testInput = document.getElementById('testInput');
+        const textDisplay = document.getElementById('textDisplay');
+        
+        testInput.addEventListener('input', (e) => {
+            textDisplay.textContent = e.target.value || 'Type something above';
+        });
+
+        // Test Google Sign-in
+        window.testGoogleSignIn = async function() {
+            const debugDiv = document.getElementById('debug');
+            debugDiv.innerHTML = 'Testing Google Sign-in...<br>';
+            
+            try {
+                // Import Firebase
+                const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js');
+                const { getAuth, GoogleAuthProvider, signInWithPopup } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+                
+                debugDiv.innerHTML += 'Firebase modules loaded successfully<br>';
+                
+                // Initialize Firebase
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBXyDjhD-uewbVQyfBIGF08sVJ6DTypJPU",
+                    authDomain: "internship-tracker-v01.firebaseapp.com",
+                    projectId: "internship-tracker-v01",
+                    storageBucket: "internship-tracker-v01.firebasestorage.app",
+                    messagingSenderId: "33562128425",
+                    appId: "1:33562128425:web:21084944a8360cf6ecec38"
+                };
+                
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                debugDiv.innerHTML += 'Firebase initialized successfully<br>';
+                
+                // Test Google Sign-in
+                const provider = new GoogleAuthProvider();
+                provider.addScope('profile');
+                provider.addScope('email');
+                
+                debugDiv.innerHTML += 'Attempting Google Sign-in...<br>';
+                const result = await signInWithPopup(auth, provider);
+                
+                debugDiv.innerHTML += `Success! Signed in as: ${result.user.displayName}<br>`;
+                debugDiv.innerHTML += `Email: ${result.user.email}<br>`;
+                
+            } catch (error) {
+                debugDiv.innerHTML += `<strong>Error:</strong> ${error.code}<br>`;
+                debugDiv.innerHTML += `Message: ${error.message}<br>`;
+                console.error('Google Sign-in test error:', error);
+            }
+        };
+    </script>
+</body>
+</html>
