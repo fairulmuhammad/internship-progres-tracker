@@ -358,7 +358,8 @@
     <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-        import { getAuth, getFirestore } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
         
         // Make Firebase available globally
         window.Firebase = {
@@ -371,7 +372,7 @@
     <!-- Main Application Script -->
     <script type="module">
         import { authService } from './js/services/auth-service.js';
-        import { initializeTaskService, getTaskService } from './js/services/task-service.js';
+        import { initializeTaskService } from './js/services/task-service.js';
         import { TaskList } from './js/components/task-list.js';
         import { TaskForm } from './js/components/task-form.js';
         import './js/config/app-config.js'; // Initialize app config

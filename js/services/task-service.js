@@ -67,12 +67,12 @@ export class TaskService {
     }
 
     // Get current user's task collection reference
-    getUserTasksCollection() {
+    async getUserTasksCollection() {
         if (!this.currentUser) {
             throw new Error('User not authenticated');
         }
         
-        const { collection } = window.Firebase.getFirestore();
+        const { collection } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
         return collection(this.db, `users/${this.currentUser.uid}/tasks`);
     }
 
@@ -97,7 +97,8 @@ export class TaskService {
 
             // Save to Firestore
             const { addDoc } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
-            const docRef = await addDoc(this.getUserTasksCollection(), task.toJSON());
+            const tasksCollection = await this.getUserTasksCollection();
+            const docRef = await addDoc(tasksCollection, task.toJSON());
             
             // Update task with Firestore ID
             task.id = docRef.id;
@@ -120,7 +121,8 @@ export class TaskService {
 
         try {
             const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
-            const taskDoc = doc(this.getUserTasksCollection(), taskId);
+            const tasksCollection = await this.getUserTasksCollection();
+            const taskDoc = doc(tasksCollection, taskId);
             const docSnap = await getDoc(taskDoc);
 
             if (docSnap.exists()) {
@@ -144,22 +146,20 @@ export class TaskService {
         try {
             const { getDocs, query, where, orderBy, limit } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
             
-            let q = this.getUserTasksCollection();
+            const tasksCollection = await this.getUserTasksCollection();
+            let q = tasksCollection;
 
             // Apply filters
             if (filters.status) {
-                const { where: whereClause } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
-                q = query(q, whereClause('status', '==', filters.status));
+                q = query(q, where('status', '==', filters.status));
             }
 
             if (filters.category) {
-                const { where: whereClause } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
-                q = query(q, whereClause('category', '==', filters.category));
+                q = query(q, where('category', '==', filters.category));
             }
 
             if (filters.priority) {
-                const { where: whereClause } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
-                q = query(q, whereClause('priority', '==', filters.priority));
+                q = query(q, where('priority', '==', filters.priority));
             }
 
             // Apply ordering
@@ -202,7 +202,8 @@ export class TaskService {
                 updatedAt: new Date().toISOString()
             };
 
-            const taskDoc = doc(this.getUserTasksCollection(), taskId);
+            const tasksCollection = await this.getUserTasksCollection();
+            const taskDoc = doc(tasksCollection, taskId);
             await updateDoc(taskDoc, updateData);
 
             console.log('Task updated successfully:', taskId);
@@ -223,7 +224,8 @@ export class TaskService {
         try {
             const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
             
-            const taskDoc = doc(this.getUserTasksCollection(), taskId);
+            const tasksCollection = await this.getUserTasksCollection();
+            const taskDoc = doc(tasksCollection, taskId);
             await deleteDoc(taskDoc);
 
             console.log('Task deleted successfully:', taskId);
@@ -308,15 +310,16 @@ export class TaskService {
     }
 
     // Listen to real-time task updates
-    listenToTasks(callback, filters = {}) {
+    async listenToTasks(callback, filters = {}) {
         if (!this.isInitialized || !this.currentUser) {
             throw new Error('TaskService not initialized or user not authenticated');
         }
 
         try {
-            const { onSnapshot, query, where, orderBy } = window.Firebase.getFirestore();
+            const { onSnapshot, query, where, orderBy } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
             
-            let q = this.getUserTasksCollection();
+            const tasksCollection = await this.getUserTasksCollection();
+            let q = tasksCollection;
 
             // Apply filters (similar to getTasks)
             if (filters.status) {
