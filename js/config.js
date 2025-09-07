@@ -18,7 +18,7 @@ export const firebaseConfig = {
 export const appConfig = {
     // Set to true to use local storage instead of Firebase
     // Change this to false to enable cloud storage
-    USE_LOCAL_STORAGE: true,  // 👈 CHANGE TO false FOR CLOUD STORAGE
+    USE_LOCAL_STORAGE: false,  // 👈 CHANGED TO false FOR CLOUD STORAGE
     
     // Unique identifier for this application instance
     APP_ID: 'internship-tracker-default',

@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only access their own data
+    match /users/{userId} {
+      // Users can read and write their own profile
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Users can access their own tasks collection
+      match /tasks/{taskId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Users can access their own categories collection
+      match /categories/{categoryId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Users can access their own progress collection
+      match /progress/{progressId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Users can access their own sessions collection
+      match /sessions/{sessionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Public read access for shared data (if needed)
+    match /public/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Admin access (optional - for admin users)
+    match /admin/{document=**} {
+      allow read, write: if request.auth != null && 
+        request.auth.token.email in [
+          'admin@yourcompany.com',  // Replace with your admin email
+          'fairmudad@gmail.com'     // Add your admin email here
+        ];
+    }
+  }
+}
