@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Internship Progress Tracker</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/auth.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .auth-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .auth-logo {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .auth-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .auth-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.15s ease;
+            background-color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .btn-primary {
+            width: 100%;
+            background-color: #4f46e5;
+            color: #ffffff;
+            border: 1px solid #4f46e5;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            margin-bottom: 16px;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background-color: #4338ca;
+            border-color: #4338ca;
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-google {
+            width: 100%;
+            background-color: #ffffff;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-google:hover:not(:disabled) {
+            background-color: #f9fafb;
+            border-color: #9ca3af;
+        }
+        
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+        
+        .divider span {
+            padding: 0 16px;
+        }
+        
+        .forgot-password {
+            text-align: center;
+            margin: 16px 0;
+        }
+        
+        .forgot-password a {
+            color: #4f46e5;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .auth-footer a {
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-error {
+            background-color: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .alert-success {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden { display: none !important; }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="auth-logo">📝</div>
+            <h1 class="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle">Sign in to your internship tracker</p>
+        </div>
+        
+        <div id="alert-message" class="alert hidden"></div>
+        
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" class="form-input" required autocomplete="email" placeholder="Enter your email">
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" class="form-input" required autocomplete="current-password" placeholder="Enter your password">
+            </div>
+            
+            <button type="submit" class="btn-primary" id="login-btn">
+                <span id="login-text">Sign In</span>
+                <div id="login-spinner" class="loading-spinner hidden"></div>
+            </button>
+        </form>
+        
+        <div class="divider">
+            <span>or</span>
+        </div>
+        
+        <button type="button" class="btn-google" id="google-btn">
+            <svg class="google-icon" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continue with Google
+        </button>
+        
+        <div class="forgot-password">
+            <a href="#" id="forgot-password-link">Forgot your password?</a>
+        </div>
+        
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="register.html">Sign up</a></p>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        
+        // Make Firebase available globally
+        window.Firebase = {
+            initializeApp,
+            getAuth
+        };
+    </script>
+    
+    <script type="module">
+        import { authService } from './js/services/auth-service.js';
+        
+        // Initialize auth service
+        await authService.initialize();
+        
+        // DOM elements
+        const loginForm = document.getElementById('login-form');
+        const googleBtn = document.getElementById('google-btn');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const alertMessage = document.getElementById('alert-message');
+        const loginBtn = document.getElementById('login-btn');
+        const loginText = document.getElementById('login-text');
+        const loginSpinner = document.getElementById('login-spinner');
+        
+        // Show/hide loading state
+        function setLoading(loading) {
+            loginBtn.disabled = loading;
+            if (loading) {
+                loginText.classList.add('hidden');
+                loginSpinner.classList.remove('hidden');
+            } else {
+                loginText.classList.remove('hidden');
+                loginSpinner.classList.add('hidden');
+            }
+        }
+        
+        // Show alert message
+        function showAlert(message, type = 'error') {
+            alertMessage.textContent = message;
+            alertMessage.className = `alert alert-${type}`;
+            alertMessage.classList.remove('hidden');
+        }
+        
+        // Hide alert message
+        function hideAlert() {
+            alertMessage.classList.add('hidden');
+        }
+        
+        // Handle login form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            setLoading(true);
+            hideAlert();
+            
+            try {
+                await authService.signInWithEmail(email, password);
+                showAlert('Welcome back! Redirecting to dashboard...', 'success');
+                // Redirect happens automatically via auth state change
+            } catch (error) {
+                showAlert(error.message);
+            } finally {
+                setLoading(false);
+            }
+        });
+        
+        // Handle Google sign in
+        googleBtn.addEventListener('click', async () => {
+            hideAlert();
+            
+            try {
+                await authService.signInWithGoogle();
+                showAlert('Welcome! Redirecting to dashboard...', 'success');
+                // Redirect happens automatically via auth state change
+            } catch (error) {
+                showAlert(error.message);
+            }
+        });
+        
+        // Handle forgot password
+        forgotPasswordLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            if (!email) {
+                showAlert('Please enter your email address first');
+                return;
+            }
+            
+            hideAlert();
+            
+            try {
+                const message = await authService.resetPassword(email);
+                showAlert(message, 'success');
+            } catch (error) {
+                showAlert(error.message);
+            }
+        });
+    </script>
+</body>
+</html>

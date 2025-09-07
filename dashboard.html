@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Internship Progress Tracker</title>
+    
+    <!-- External Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>Internship Progress Journal</h1>
+                    <p>Track your daily progress, learnings, and achievements with a professional memo system.</p>
+                </div>
+                
+                <div class="header-right">
+                    <!-- User Profile Section -->
+                    <div id="user-section">
+                        <!-- User profile will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Storage Mode Indicator -->
+            <div id="storage-indicator" class="storage-mode">
+                <span id="storage-status">☁️ Cloud Sync</span>
+                <span id="sync-status" class="sync-status hidden">🔄 Syncing...</span>
+                <button id="toggle-storage" class="btn btn-secondary btn-sm">⚙️ Settings</button>
+            </div>
+        </header>
+
+        <!-- Add Memo Form -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Add a New Memo</h2>
+                <p class="card-subtitle">Document your daily progress and learnings</p>
+            </div>
+            
+            <form id="memo-form">
+                <input type="hidden" id="memo-id">
+                
+                <div class="grid grid-cols-2 mb-4">
+                    <div class="form-group">
+                        <label for="memo-date" class="form-label">Date</label>
+                        <input type="date" id="memo-date" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="memo-time" class="form-label">Time</label>
+                        <input type="time" id="memo-time" class="form-input" required>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 mb-4">
+                    <div class="form-group">
+                        <label for="memo-category" class="form-label">Category</label>
+                        <select id="memo-category" class="form-select" required>
+                            <option value="development">Development</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="learning">Learning</option>
+                            <option value="planning">Planning</option>
+                            <option value="testing">Testing</option>
+                            <option value="documentation">Documentation</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="memo-duration" class="form-label">Duration (hours)</label>
+                        <input type="number" id="memo-duration" step="0.5" min="0.5" max="12" placeholder="e.g., 2.5" class="form-input">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="memo-title" class="form-label">Title / Task</label>
+                    <input type="text" id="memo-title" placeholder="e.g., Implemented user authentication, Fixed responsive design bugs" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="memo-description" class="form-label">Description & Learnings</label>
+                    <textarea id="memo-description" rows="5" placeholder="Describe what you did, challenges faced, and what you learned. You can use Markdown for formatting." class="form-textarea" required></textarea>
+                    <p class="form-help-text">Supports Markdown for lists, bold, italics, etc.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="memo-tags" class="form-label">Tags (optional)</label>
+                    <input type="text" id="memo-tags" placeholder="e.g., javascript, react, debugging" class="form-input">
+                    <p class="form-help-text">Separate tags with commas</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="memo-files" class="form-label">Attachments (optional)</label>
+                    <div class="file-drop-zone">
+                        <input type="file" id="memo-files" multiple accept="image/*,.pdf,.doc,.docx,.txt,.json,.js,.html,.css,.py">
+                        <p class="form-help-text">
+                            Supported formats: Images (JPG, PNG, GIF), Documents (PDF, DOC, TXT), Code files (JS, HTML, CSS, PY, JSON)
+                            <br>Max size: 10MB per file. Multiple files allowed.
+                        </p>
+                    </div>
+                    
+                    <div id="file-preview" class="file-preview hidden">
+                        <h4 class="form-label">Selected Files:</h4>
+                        <div id="file-list"></div>
+                    </div>
+                    
+                    <div id="existing-files" class="file-preview hidden">
+                        <h4 class="form-label">Current Attachments:</h4>
+                        <div id="existing-file-list"></div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <div class="flex gap-3">
+                        <button type="button" id="export-btn" class="btn btn-secondary">Export Data</button>
+                        <input type="file" id="import-file" accept=".json" class="hidden">
+                        <button type="button" id="import-btn" class="btn btn-secondary">Import Data</button>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-edit-btn" class="btn btn-secondary hidden">Cancel Edit</button>
+                        <button type="submit" id="submit-btn" class="btn btn-primary">Add Memo</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Statistics Dashboard -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Progress Overview</h2>
+                <p class="card-subtitle">Your internship statistics at a glance</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <h3 class="stat-title">Total Memos</h3>
+                    <p id="total-memos" class="stat-value">0</p>
+                </div>
+                <div class="stat-card green">
+                    <h3 class="stat-title">Total Hours</h3>
+                    <p id="total-hours" class="stat-value">0</p>
+                </div>
+                <div class="stat-card purple">
+                    <h3 class="stat-title">This Week</h3>
+                    <p id="week-hours" class="stat-value">0h</p>
+                </div>
+                <div class="stat-card orange">
+                    <h3 class="stat-title">Avg per Day</h3>
+                    <p id="avg-hours" class="stat-value">0h</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="search-filters">
+            <input type="text" id="search-bar" placeholder="Search memos..." class="form-input search-input">
+            <select id="category-filter" class="form-select">
+                <option value="">All Categories</option>
+                <option value="development">Development</option>
+                <option value="meeting">Meeting</option>
+                <option value="learning">Learning</option>
+                <option value="planning">Planning</option>
+                <option value="testing">Testing</option>
+                <option value="documentation">Documentation</option>
+                <option value="other">Other</option>
+            </select>
+            <input type="date" id="date-filter" class="form-input">
+        </div>
+
+        <!-- Memo List -->
+        <div id="memo-list" class="memo-list">
+            <!-- Memos will be dynamically inserted here -->
+        </div>
+        
+        <div id="loading-indicator" class="loading">
+            <div class="spinner"></div>
+            <span>Loading memos...</span>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+        
+        // Make Firebase available globally for our modules
+        window.Firebase = {
+            initializeApp,
+            getAuth,
+            getFirestore
+        };
+    </script>
+    
+    <!-- Authentication Protection -->
+    <script type="module">
+        import { authService } from './js/services/auth-service.js';
+        import { authUI } from './js/components/auth-ui.js';
+        
+        // Initialize auth and protect dashboard
+        async function initializeDashboard() {
+            try {
+                await authService.initialize();
+                
+                // Check if user is authenticated
+                authService.onAuthStateChanged((user) => {
+                    if (!user) {
+                        // Not authenticated, redirect to login
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                    
+                    // User is authenticated, set up profile
+                    const userSection = document.getElementById('user-section');
+                    if (userSection && user) {
+                        const userProfile = authUI.createUserProfile(user);
+                        if (userProfile) {
+                            userSection.innerHTML = '';
+                            userSection.appendChild(userProfile);
+                        }
+                    }
+                    
+                    // Update storage status for authenticated user
+                    const storageStatus = document.getElementById('storage-status');
+                    if (storageStatus) {
+                        const userInfo = authService.getUserInfo();
+                        storageStatus.textContent = `☁️ Cloud Sync (${userInfo?.displayName || user.email})`;
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Failed to initialize dashboard auth:', error);
+                // Redirect to login on error
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // Initialize dashboard protection
+        initializeDashboard();
+    </script>
+    
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
+
+

@@ -3,6 +3,8 @@ import { appConfig } from './config.js';
 import { storageService } from './storage.js';
 import { fileService } from './file-service.js';
 import { uiComponents, StatsCalculator, FormValidator } from './ui-components.js';
+import { authService } from './services/auth-service.js';
+import { authUI } from './components/auth-ui.js';
 
 class InternshipTracker {
     constructor() {
@@ -147,6 +149,14 @@ class InternshipTracker {
         this.elements.exportBtn.addEventListener('click', () => this.exportData());
         this.elements.importBtn.addEventListener('click', () => this.elements.importFile.click());
         this.elements.importFile.addEventListener('change', (e) => this.importData(e));
+        
+        // Authentication buttons
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        
+        if (loginBtn) {
+            loginBtn.addEventListener('click', () => authUI.showLoginModal());
+        }
     }
 
     // Handle form submission

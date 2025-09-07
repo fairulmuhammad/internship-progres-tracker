@@ -5,174 +5,270 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Internship Progress Tracker</title>
     
-    <!-- External Dependencies -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+        }
+        
+        .landing-container {
+            text-align: center;
+            color: white;
+            max-width: 600px;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            min-width: 150px;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: #4f46e5;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+            padding: 0 20px;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .feature-description {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            min-height: 60vh;
+            justify-content: center;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="main-header">
-            <h1>Internship Progress Journal</h1>
-            <p>Track your daily progress, learnings, and achievements with a professional memo system.</p>
-            
-            <!-- Storage Mode Indicator -->
-            <div id="storage-indicator" class="storage-mode">
-                <span id="storage-status">📱 Local Storage Mode</span>
-                <button id="toggle-storage" class="btn btn-secondary btn-sm">⚙️ Settings</button>
-            </div>
-        </header>
-
-        <!-- Add Memo Form -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Add a New Memo</h2>
-                <p class="card-subtitle">Document your daily progress and learnings</p>
-            </div>
-            
-            <form id="memo-form">
-                <input type="hidden" id="memo-id">
-                
-                <div class="grid grid-cols-2 mb-4">
-                    <div class="form-group">
-                        <label for="memo-date" class="form-label">Date</label>
-                        <input type="date" id="memo-date" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="memo-time" class="form-label">Time</label>
-                        <input type="time" id="memo-time" class="form-input" required>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-2 mb-4">
-                    <div class="form-group">
-                        <label for="memo-category" class="form-label">Category</label>
-                        <select id="memo-category" class="form-select" required>
-                            <option value="development">Development</option>
-                            <option value="meeting">Meeting</option>
-                            <option value="learning">Learning</option>
-                            <option value="planning">Planning</option>
-                            <option value="testing">Testing</option>
-                            <option value="documentation">Documentation</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="memo-duration" class="form-label">Duration (hours)</label>
-                        <input type="number" id="memo-duration" step="0.5" min="0.5" max="12" placeholder="e.g., 2.5" class="form-input">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="memo-title" class="form-label">Title / Task</label>
-                    <input type="text" id="memo-title" placeholder="e.g., Implemented user authentication, Fixed responsive design bugs" class="form-input" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="memo-description" class="form-label">Description & Learnings</label>
-                    <textarea id="memo-description" rows="5" placeholder="Describe what you did, challenges faced, and what you learned. You can use Markdown for formatting." class="form-textarea" required></textarea>
-                    <p class="form-help-text">Supports Markdown for lists, bold, italics, etc.</p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="memo-tags" class="form-label">Tags (optional)</label>
-                    <input type="text" id="memo-tags" placeholder="e.g., javascript, react, debugging" class="form-input">
-                    <p class="form-help-text">Separate tags with commas</p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="memo-files" class="form-label">Attachments (optional)</label>
-                    <div class="file-drop-zone">
-                        <input type="file" id="memo-files" multiple accept="image/*,.pdf,.doc,.docx,.txt,.json,.js,.html,.css,.py">
-                        <p class="form-help-text">
-                            Supported formats: Images (JPG, PNG, GIF), Documents (PDF, DOC, TXT), Code files (JS, HTML, CSS, PY, JSON)
-                            <br>Max size: 10MB per file. Multiple files allowed.
-                        </p>
-                    </div>
-                    
-                    <div id="file-preview" class="file-preview hidden">
-                        <h4 class="form-label">Selected Files:</h4>
-                        <div id="file-list"></div>
-                    </div>
-                    
-                    <div id="existing-files" class="file-preview hidden">
-                        <h4 class="form-label">Current Attachments:</h4>
-                        <div id="existing-file-list"></div>
-                    </div>
-                </div>
-                
-                <div class="flex justify-between items-center">
-                    <div class="flex gap-3">
-                        <button type="button" id="export-btn" class="btn btn-secondary">Export Data</button>
-                        <input type="file" id="import-file" accept=".json" class="hidden">
-                        <button type="button" id="import-btn" class="btn btn-secondary">Import Data</button>
-                    </div>
-                    <div class="flex gap-3">
-                        <button type="button" id="cancel-edit-btn" class="btn btn-secondary hidden">Cancel Edit</button>
-                        <button type="submit" id="submit-btn" class="btn btn-primary">Add Memo</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        
-        <!-- Statistics Dashboard -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Progress Overview</h2>
-                <p class="card-subtitle">Your internship statistics at a glance</p>
-            </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card blue">
-                    <h3 class="stat-title">Total Memos</h3>
-                    <p id="total-memos" class="stat-value">0</p>
-                </div>
-                <div class="stat-card green">
-                    <h3 class="stat-title">Total Hours</h3>
-                    <p id="total-hours" class="stat-value">0</p>
-                </div>
-                <div class="stat-card purple">
-                    <h3 class="stat-title">This Week</h3>
-                    <p id="week-hours" class="stat-value">0h</p>
-                </div>
-                <div class="stat-card orange">
-                    <h3 class="stat-title">Avg per Day</h3>
-                    <p id="avg-hours" class="stat-value">0h</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Search and Filter -->
-        <div class="search-filters">
-            <input type="text" id="search-bar" placeholder="Search memos..." class="form-input search-input">
-            <select id="category-filter" class="form-select">
-                <option value="">All Categories</option>
-                <option value="development">Development</option>
-                <option value="meeting">Meeting</option>
-                <option value="learning">Learning</option>
-                <option value="planning">Planning</option>
-                <option value="testing">Testing</option>
-                <option value="documentation">Documentation</option>
-                <option value="other">Other</option>
-            </select>
-            <input type="date" id="date-filter" class="form-input">
-        </div>
-
-        <!-- Memo List -->
-        <div id="memo-list" class="memo-list">
-            <!-- Memos will be dynamically inserted here -->
-        </div>
-        
-        <div id="loading-indicator" class="loading">
+    <div class="landing-container">
+        <div id="loading-screen" class="loading-screen">
             <div class="spinner"></div>
-            <span>Loading memos...</span>
+            <div class="loading-text">Checking authentication...</div>
+        </div>
+        
+        <div id="landing-content">
+            <div class="logo">📝</div>
+            <h1 class="title">Internship Progress Tracker</h1>
+            <p class="subtitle">
+                Track your daily progress, document learnings, and showcase your internship journey with a professional memo system. 
+                Build a comprehensive portfolio of your growth and achievements.
+            </p>
+            
+            <div class="cta-buttons">
+                <a href="register.html" class="btn btn-primary">Get Started</a>
+                <a href="login.html" class="btn btn-secondary">Sign In</a>
+            </div>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">Progress Tracking</div>
+                    <div class="feature-description">Monitor your daily activities, hours worked, and skill development with detailed analytics and insights.</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">☁️</div>
+                    <div class="feature-title">Cloud Sync</div>
+                    <div class="feature-description">Access your data from any device with secure cloud synchronization and backup.</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-title">Goal Setting</div>
+                    <div class="feature-description">Set milestones, track achievements, and build a professional portfolio of your internship experience.</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- JavaScript -->
-    <script type="module" src="js/app.js"></script>
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        
+        // Make Firebase available globally
+        window.Firebase = {
+            initializeApp,
+            getAuth
+        };
+    </script>
+    
+    <script type="module">
+        const loadingScreen = document.getElementById('loading-screen');
+        const landingContent = document.getElementById('landing-content');
+        
+        // Function to show landing page  
+        function showLandingPage() {
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            if (landingContent) landingContent.style.display = 'block';
+        }
+        
+        // Function to redirect to dashboard
+        function redirectToDashboard() {
+            window.location.href = './dashboard.html';
+        }
+        
+        // Show landing page immediately (auth check will happen in background)
+        showLandingPage();
+        
+        // Try to initialize auth service in background
+        try {
+            const { authService } = await import('./js/services/auth-service.js');
+            await authService.initialize();
+            
+            // Check authentication state
+            authService.onAuthStateChanged((user) => {
+                if (user) {
+                    // User is authenticated, redirect to dashboard
+                    redirectToDashboard();
+                }
+                // If no user, landing page is already visible
+            });
+            
+        } catch (error) {
+            console.error('Auth service not available:', error);
+            // Landing page is already visible, no action needed
+        }
+    </script>
 </body>
 </html>
 
