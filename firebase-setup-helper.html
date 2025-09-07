@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Setup Helper - Internship Progress Tracker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4285f4;
+        }
+        
+        .error-box {
+            background: #fee;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .step {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .step-number {
+            background: #4285f4;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .step-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .domain-list {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .domain-item {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .copy-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .copy-btn:hover {
+            background: #1976d2;
+        }
+        
+        .firebase-link {
+            display: inline-block;
+            background: #4285f4;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        
+        .firebase-link:hover {
+            background: #1976d2;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .checklist li:before {
+            content: "☐ ";
+            color: #666;
+            margin-right: 8px;
+        }
+        
+        .test-section {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔥 Firebase Google Sign-in Setup</h1>
+            <p>Fix the "This domain is not authorized for Google Sign-in" error</p>
+        </div>
+
+        <div class="error-box">
+            <strong>❌ Current Error:</strong><br>
+            "This domain is not authorized for Google Sign-in"<br>
+            <small>This means Firebase doesn't recognize your current domain as safe for Google authentication.</small>
+        </div>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">1</span>
+                Open Firebase Console
+            </div>
+            <p>Click the button below to open your Firebase project console:</p>
+            <a href="https://console.firebase.google.com/project/internship-tracker-v01" target="_blank" class="firebase-link">
+                🚀 Open Firebase Console
+            </a>
+            <p><small>Make sure you're signed in with the Google account that owns this Firebase project.</small></p>
+        </div>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">2</span>
+                Navigate to Authentication Settings
+            </div>
+            <ol>
+                <li>In the left sidebar, click <strong>"Authentication"</strong></li>
+                <li>Click on the <strong>"Settings"</strong> tab (⚙️ gear icon)</li>
+                <li>Scroll down to the <strong>"Authorized domains"</strong> section</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">3</span>
+                Add Required Domains
+            </div>
+            <p>Add the following domains to your authorized domains list:</p>
+            
+            <div class="domain-list">
+                <div class="domain-item">
+                    <span>localhost</span>
+                    <button class="copy-btn" onclick="copyToClipboard('localhost')">Copy</button>
+                </div>
+                <div class="domain-item">
+                    <span>127.0.0.1</span>
+                    <button class="copy-btn" onclick="copyToClipboard('127.0.0.1')">Copy</button>
+                </div>
+                <div class="domain-item">
+                    <span>fairulmuhammad.github.io</span>
+                    <button class="copy-btn" onclick="copyToClipboard('fairulmuhammad.github.io')">Copy</button>
+                </div>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Important:</strong> Add each domain one by one by clicking "Add domain" and pasting the domain name.
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">4</span>
+                Verify Google Sign-in is Enabled
+            </div>
+            <ol>
+                <li>Go to <strong>Authentication</strong> → <strong>Sign-in method</strong> tab</li>
+                <li>Find <strong>"Google"</strong> in the providers list</li>
+                <li>Make sure it shows <strong>"Enabled"</strong></li>
+                <li>If not enabled:
+                    <ul>
+                        <li>Click on Google provider</li>
+                        <li>Toggle <strong>"Enable"</strong></li>
+                        <li>Add your email as <strong>"Project support email"</strong></li>
+                        <li>Click <strong>"Save"</strong></li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <div class="step-title">
+                <span class="step-number">5</span>
+                Test Your Setup
+            </div>
+            <p>After completing the setup:</p>
+            <ul class="checklist">
+                <li>Refresh your application</li>
+                <li>Try Google Sign-in again</li>
+                <li>The error should be resolved!</li>
+            </ul>
+            
+            <div class="success-box">
+                <strong>✅ Success!</strong> If Google Sign-in works, you've successfully configured Firebase authentication.
+            </div>
+        </div>
+
+        <div class="warning">
+            <h3>🛠️ Alternative Solutions:</h3>
+            <ul>
+                <li><strong>Use 127.0.0.1:</strong> Try accessing your app via <code>http://127.0.0.1:8080</code> instead of <code>http://localhost:8080</code></li>
+                <li><strong>Clear browser cache:</strong> Sometimes old Firebase tokens can cause issues</li>
+                <li><strong>Check project ID:</strong> Make sure you're configuring the correct Firebase project</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p><small>For detailed instructions, see: <code>docs/firebase-setup.md</code></small></p>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Visual feedback
+                event.target.textContent = 'Copied!';
+                setTimeout(() => {
+                    event.target.textContent = 'Copy';
+                }, 1000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy. Please copy manually: ' + text);
+            });
+        }
+
+        // Auto-detect current domain and show relevant info
+        window.addEventListener('DOMContentLoaded', () => {
+            const currentDomain = window.location.hostname;
+            const currentPort = window.location.port;
+            const fullDomain = currentPort ? `${currentDomain}:${currentPort}` : currentDomain;
+            
+            console.log('Current domain:', fullDomain);
+            
+            // If on localhost, highlight that domain
+            if (currentDomain === 'localhost' || currentDomain === '127.0.0.1') {
+                const domainItems = document.querySelectorAll('.domain-item');
+                domainItems.forEach(item => {
+                    const domainText = item.querySelector('span').textContent;
+                    if (domainText === currentDomain) {
+                        item.style.background = '#ffeb3b';
+                        item.style.border = '2px solid #ff9800';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

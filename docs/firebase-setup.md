@@ -15,12 +15,22 @@ This error occurs because localhost is not added to Firebase's authorized domain
 2. Click on the **Settings** tab (gear icon)
 3. Scroll down to **Authorized domains**
 
-### Step 3: Add localhost
+### Step 3: Add Required Domains
 1. Click **Add domain**
-2. Type: `localhost`
-3. Click **Add**
+2. Add the following domains one by one:
+   - `localhost` (for local development)
+   - `127.0.0.1` (alternative local address)
+   - `fairulmuhammad.github.io` (for GitHub Pages production)
+3. Click **Add** for each domain
 
-### Step 4: Enable Google Sign-in (if not already enabled)
+### Step 4: Verify Your Authorized Domains List
+Your authorized domains should include:
+- `localhost`
+- `127.0.0.1`
+- `fairulmuhammad.github.io`
+- Any other domains where you plan to host the app
+
+### Step 5: Enable Google Sign-in (if not already enabled)
 1. Go to **Authentication** → **Sign-in method** tab
 2. Find **Google** in the list
 3. Click on it
@@ -28,7 +38,7 @@ This error occurs because localhost is not added to Firebase's authorized domain
 5. Add your email as **Project support email**
 6. Click **Save**
 
-### Step 5: Test
+### Step 6: Test
 - Refresh your application
 - Try Google Sign-in again
 

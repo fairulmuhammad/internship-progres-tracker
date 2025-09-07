@@ -314,6 +314,8 @@ class AuthService {
             'auth/popup-blocked': 'Pop-up blocked by browser. Please allow pop-ups and try again',
             'auth/cancelled-popup-request': 'Sign-in cancelled',
             'auth/popup-closed-by-user': 'Sign-in cancelled',
+            'auth/unauthorized-domain': 'This domain is not authorized for Google Sign-in. Please check Firebase Console settings.',
+            'auth/operation-not-allowed': 'This sign-in method is not enabled. Please check Firebase Console settings.',
             'session-expired': 'Your session has expired. Please sign in again.',
             'session-inactive': 'You have been signed out due to inactivity.'
         };
