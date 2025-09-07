@@ -233,26 +233,29 @@
     </script>
     
     <script type="module">
+        import { authService } from './js/services/auth-service.js';
+        import './js/config/app-config.js'; // Initialize app config
+        
         const loadingScreen = document.getElementById('loading-screen');
         const landingContent = document.getElementById('landing-content');
         
-        // Function to show landing page  
+        // Function to show landing page
         function showLandingPage() {
-            if (loadingScreen) loadingScreen.style.display = 'none';
-            if (landingContent) landingContent.style.display = 'block';
+            loadingScreen.style.display = 'none';
+            landingContent.style.display = 'block';
         }
         
         // Function to redirect to dashboard
         function redirectToDashboard() {
-            window.location.href = './dashboard.html';
+            if (window.appConfig) {
+                window.appConfig.navigateTo('dashboard.html');
+            } else {
+                window.location.href = './dashboard.html';
+            }
         }
         
-        // Show landing page immediately (auth check will happen in background)
-        showLandingPage();
-        
-        // Try to initialize auth service in background
         try {
-            const { authService } = await import('./js/services/auth-service.js');
+            // Initialize auth service
             await authService.initialize();
             
             // Check authentication state
@@ -260,14 +263,25 @@
                 if (user) {
                     // User is authenticated, redirect to dashboard
                     redirectToDashboard();
+                } else {
+                    // User is not authenticated, show landing page
+                    showLandingPage();
                 }
-                // If no user, landing page is already visible
             });
             
         } catch (error) {
-            console.error('Auth service not available:', error);
-            // Landing page is already visible, no action needed
+            console.error('Failed to initialize auth:', error);
+            // Show landing page on error
+            showLandingPage();
         }
+        
+        // Fallback: Show landing page after 3 seconds if nothing happens
+        setTimeout(() => {
+            if (loadingScreen.style.display !== 'none') {
+                console.log('Auth check timed out, showing landing page');
+                showLandingPage();
+            }
+        }, 3000);
     </script>
 </body>
 </html>

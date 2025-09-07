@@ -324,7 +324,7 @@
         </div>
         
         <div class="auth-footer">
-            <p>Already have an account? <a href="login.html">Sign in</a></p>
+            <p>Already have an account? <a href="#" id="login-link">Sign in</a></p>
         </div>
     </div>
 
@@ -342,6 +342,7 @@
     
     <script type="module">
         import { authService } from './js/services/auth-service.js';
+        import './js/config/app-config.js'; // Initialize app config
         
         // Initialize auth service
         await authService.initialize();
@@ -480,6 +481,16 @@
                 // Redirect happens automatically via auth state change
             } catch (error) {
                 showAlert(error.message);
+            }
+        });
+
+        // Handle login link
+        document.getElementById('login-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (window.appConfig) {
+                window.appConfig.navigateTo('login.html');
+            } else {
+                window.location.href = './login.html';
             }
         });
     </script>

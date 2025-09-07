@@ -9,6 +9,9 @@ class AuthService {
         this.authStateCallbacks = [];
         this.firebaseApp = null;
         
+        // Initialize app configuration
+        this.appConfig = window.appConfig;
+        
         // Session management properties
         this.sessionTimeout = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
         this.inactivityTimeout = 30 * 60 * 1000; // 30 minutes in milliseconds
@@ -61,8 +64,7 @@ class AuthService {
 
     // Handle authentication state changes and routing
     handleAuthStateChange(user) {
-        const currentPath = window.location.pathname;
-        const currentPage = currentPath.split('/').pop() || 'index.html';
+        const currentPage = this.appConfig?.getCurrentPage() || window.location.pathname.split('/').pop() || 'index.html';
         
         if (user) {
             // User is authenticated
@@ -76,7 +78,11 @@ class AuthService {
             
             // If user is on auth pages or home page, redirect to dashboard
             if (currentPage === 'login.html' || currentPage === 'register.html' || currentPage === 'index.html' || currentPage === '') {
-                window.location.href = './dashboard.html';
+                if (this.appConfig) {
+                    this.appConfig.navigateTo('dashboard.html');
+                } else {
+                    window.location.href = './dashboard.html';
+                }
             }
         } else {
             // User is not authenticated
@@ -90,7 +96,11 @@ class AuthService {
             
             // If user is trying to access dashboard, redirect to login
             if (currentPage === 'dashboard.html') {
-                window.location.href = './login.html';
+                if (this.appConfig) {
+                    this.appConfig.navigateTo('login.html');
+                } else {
+                    window.location.href = './login.html';
+                }
             }
         }
     }
@@ -226,7 +236,11 @@ class AuthService {
             
             // Redirect to login page if requested
             if (shouldRedirect) {
-                window.location.href = './login.html';
+                if (this.appConfig) {
+                    this.appConfig.navigateTo('login.html');
+                } else {
+                    window.location.href = './login.html';
+                }
             }
             
         } catch (error) {
@@ -238,7 +252,11 @@ class AuthService {
     // Check if user is authenticated (for route protection)
     requireAuth() {
         if (!this.currentUser) {
-            window.location.href = './login.html';
+            if (this.appConfig) {
+                this.appConfig.navigateTo('login.html');
+            } else {
+                window.location.href = './login.html';
+            }
             return false;
         }
         return true;

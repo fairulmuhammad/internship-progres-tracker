@@ -274,7 +274,7 @@
         </div>
         
         <div class="auth-footer">
-            <p>Don't have an account? <a href="register.html">Sign up</a></p>
+            <p>Don't have an account? <a href="#" id="register-link">Sign up</a></p>
         </div>
     </div>
 
@@ -292,6 +292,7 @@
     
     <script type="module">
         import { authService } from './js/services/auth-service.js';
+        import './js/config/app-config.js'; // Initialize app config
         
         // Initialize auth service
         await authService.initialize();
@@ -380,6 +381,16 @@
                 showAlert(message, 'success');
             } catch (error) {
                 showAlert(error.message);
+            }
+        });
+
+        // Handle register link
+        document.getElementById('register-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (window.appConfig) {
+                window.appConfig.navigateTo('register.html');
+            } else {
+                window.location.href = './register.html';
             }
         });
     </script>
