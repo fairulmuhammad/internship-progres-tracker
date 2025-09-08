@@ -11,6 +11,194 @@
     <!-- Styles -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/auth.css">
+    
+    <!-- Custom Styles for Enhanced Features -->
+    <style>
+        .time-tracking-section {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.05), rgba(139, 92, 246, 0.05));
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .section-title {
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .time-tracking-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .time-tracking-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .duration-display {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-weight: 600;
+            color: #4f46e5;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .time-tracking-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .active-timer {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            color: #dc2626;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .timer-dot {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .mt-1 {
+            margin-top: 0.25rem;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Memo Card Enhancements for Text Truncation */
+        .memo-content {
+            position: relative;
+        }
+        
+        .memo-description {
+            line-height: 1.6;
+            max-height: 6.4rem; /* 4 lines at 1.6 line-height */
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .memo-description.expanded {
+            max-height: none;
+        }
+        
+        .memo-description.truncated::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 100px;
+            height: 1.6rem;
+            background: linear-gradient(to right, transparent, white);
+            pointer-events: none;
+        }
+        
+        .expand-toggle {
+            background: none;
+            border: none;
+            color: #4f46e5;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+            padding: 0;
+            text-decoration: underline;
+        }
+        
+        .expand-toggle:hover {
+            color: #3730a3;
+        }
+        
+        .memo-timestamps {
+            background: #f8fafc;
+            border-left: 3px solid #4f46e5;
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin: 0.75rem 0;
+            font-size: 0.875rem;
+        }
+        
+        .timestamp-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.25rem 0;
+        }
+        
+        .timestamp-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .timestamp-value {
+            color: #374151;
+            font-family: monospace;
+            font-weight: 600;
+        }
+        
+        .duration-highlight {
+            background: #ecfdf5;
+            color: #065f46;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        /* Simple Time Section Styles */
+        .simple-time-section {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(16, 185, 129, 0.05));
+            border: 1px solid #d1fae5;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .simple-time-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .simple-time-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -97,6 +285,56 @@
                     <div class="form-group">
                         <label for="memo-duration" class="form-label">Duration (hours)</label>
                         <input type="number" id="memo-duration" step="0.5" min="0.5" max="12" placeholder="e.g., 2.5" class="form-input">
+                    </div>
+                </div>
+                
+                <!-- Time Tracking Section -->
+                <div class="time-tracking-section">
+                    <h3 class="section-title">⏰ Time Tracking</h3>
+                    <div class="time-tracking-grid">
+                        <div class="form-group">
+                            <label for="start-time" class="form-label">Start Time</label>
+                            <input type="datetime-local" id="start-time" class="form-input">
+                            <button type="button" id="set-start-now" class="btn btn-sm btn-secondary mt-1">Set to Now</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="end-time" class="form-label">End Time</label>
+                            <input type="datetime-local" id="end-time" class="form-input">
+                            <button type="button" id="set-end-now" class="btn btn-sm btn-secondary mt-1">Set to Now</button>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Calculated Duration</label>
+                            <div id="calculated-duration" class="duration-display">--:-- hours</div>
+                            <div class="time-tracking-actions">
+                                <button type="button" id="start-timer" class="btn btn-sm btn-primary">▶️ Start Working</button>
+                                <button type="button" id="stop-timer" class="btn btn-sm btn-success hidden">⏹️ Stop & Add Memo</button>
+                                <div id="active-timer" class="active-timer hidden">
+                                    <span class="timer-dot">🔴</span>
+                                    <span id="timer-display">00:00:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Simple Clock Time Section -->
+                <div class="simple-time-section">
+                    <h3 class="section-title">🕐 Simple Time Log</h3>
+                    <div class="simple-time-grid">
+                        <div class="form-group">
+                            <label for="simple-start-time" class="form-label">Start Time</label>
+                            <input type="time" id="simple-start-time" class="form-input" placeholder="e.g., 09:30">
+                            <button type="button" id="set-simple-start-now" class="btn btn-sm btn-secondary mt-1">Current Time</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="simple-end-time" class="form-label">End Time</label>
+                            <input type="time" id="simple-end-time" class="form-input" placeholder="e.g., 11:45">
+                            <button type="button" id="set-simple-end-now" class="btn btn-sm btn-secondary mt-1">Current Time</button>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Simple Duration</label>
+                            <div id="simple-calculated-duration" class="duration-display">--:-- hours</div>
+                        </div>
                     </div>
                 </div>
                 
@@ -207,6 +445,282 @@
     </div>
 
     <!-- JavaScript -->
+    <!-- Enhanced Features Script -->
+    <script>
+        // Time Tracking Functionality
+        class TimeTracker {
+            constructor() {
+                this.timerInterval = null;
+                this.startTime = null;
+                this.isRunning = false;
+                this.initializeEventListeners();
+                this.initializeTimeFields();
+            }
+            
+            initializeEventListeners() {
+                // Set current time buttons
+                document.getElementById('set-start-now')?.addEventListener('click', () => {
+                    this.setCurrentTime('start-time');
+                });
+                
+                document.getElementById('set-end-now')?.addEventListener('click', () => {
+                    this.setCurrentTime('end-time');
+                });
+                
+                // Simple time buttons
+                document.getElementById('set-simple-start-now')?.addEventListener('click', () => {
+                    this.setCurrentSimpleTime('simple-start-time');
+                });
+                
+                document.getElementById('set-simple-end-now')?.addEventListener('click', () => {
+                    this.setCurrentSimpleTime('simple-end-time');
+                });
+                
+                // Timer buttons
+                document.getElementById('start-timer')?.addEventListener('click', () => {
+                    this.startTimer();
+                });
+                
+                document.getElementById('stop-timer')?.addEventListener('click', () => {
+                    this.stopTimer();
+                });
+                
+                // Duration calculation
+                document.getElementById('start-time')?.addEventListener('change', () => {
+                    this.calculateDuration();
+                });
+                
+                document.getElementById('end-time')?.addEventListener('change', () => {
+                    this.calculateDuration();
+                });
+                
+                // Simple duration calculation
+                document.getElementById('simple-start-time')?.addEventListener('change', () => {
+                    this.calculateSimpleDuration();
+                });
+                
+                document.getElementById('simple-end-time')?.addEventListener('change', () => {
+                    this.calculateSimpleDuration();
+                });
+            }
+            
+            initializeTimeFields() {
+                // Set default start time to current time
+                const now = new Date();
+                const startTimeInput = document.getElementById('start-time');
+                if (startTimeInput) {
+                    startTimeInput.value = this.formatDateTimeLocal(now);
+                }
+            }
+            
+            setCurrentTime(fieldId) {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.value = this.formatDateTimeLocal(new Date());
+                    this.calculateDuration();
+                }
+            }
+            
+            setCurrentSimpleTime(fieldId) {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    const now = new Date();
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    field.value = `${hours}:${minutes}`;
+                    this.calculateSimpleDuration();
+                }
+            }
+            
+            calculateSimpleDuration() {
+                const startTime = document.getElementById('simple-start-time')?.value;
+                const endTime = document.getElementById('simple-end-time')?.value;
+                const durationDisplay = document.getElementById('simple-calculated-duration');
+                
+                if (startTime && endTime && durationDisplay) {
+                    const [startHours, startMinutes] = startTime.split(':').map(Number);
+                    const [endHours, endMinutes] = endTime.split(':').map(Number);
+                    
+                    const startMinutesTotal = startHours * 60 + startMinutes;
+                    const endMinutesTotal = endHours * 60 + endMinutes;
+                    
+                    let diffMinutes = endMinutesTotal - startMinutesTotal;
+                    
+                    // Handle next day scenario
+                    if (diffMinutes < 0) {
+                        diffMinutes += 24 * 60; // Add 24 hours in minutes
+                    }
+                    
+                    if (diffMinutes > 0) {
+                        const hours = Math.floor(diffMinutes / 60);
+                        const minutes = diffMinutes % 60;
+                        const totalHours = (diffMinutes / 60).toFixed(2);
+                        
+                        durationDisplay.innerHTML = `${hours}h ${minutes}m (${totalHours} hours)`;
+                        
+                        // Update the duration field
+                        const durationField = document.getElementById('memo-duration');
+                        if (durationField) {
+                            durationField.value = totalHours;
+                        }
+                    } else {
+                        durationDisplay.innerHTML = 'Invalid time range';
+                    }
+                }
+            }
+            
+            formatDateTimeLocal(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+            
+            calculateDuration() {
+                const startTime = document.getElementById('start-time')?.value;
+                const endTime = document.getElementById('end-time')?.value;
+                const durationDisplay = document.getElementById('calculated-duration');
+                
+                if (startTime && endTime && durationDisplay) {
+                    const start = new Date(startTime);
+                    const end = new Date(endTime);
+                    const diffMs = end - start;
+                    
+                    if (diffMs > 0) {
+                        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                        const totalHours = (diffMs / (1000 * 60 * 60)).toFixed(2);
+                        
+                        durationDisplay.innerHTML = `${hours}h ${minutes}m (${totalHours} hours)`;
+                        
+                        // Update the duration field
+                        const durationField = document.getElementById('memo-duration');
+                        if (durationField) {
+                            durationField.value = totalHours;
+                        }
+                    } else {
+                        durationDisplay.innerHTML = 'Invalid time range';
+                    }
+                }
+            }
+            
+            startTimer() {
+                this.isRunning = true;
+                this.startTime = new Date();
+                
+                // Set start time
+                document.getElementById('start-time').value = this.formatDateTimeLocal(this.startTime);
+                
+                // Update UI
+                document.getElementById('start-timer').classList.add('hidden');
+                document.getElementById('stop-timer').classList.remove('hidden');
+                document.getElementById('active-timer').classList.remove('hidden');
+                
+                // Start timer display
+                this.timerInterval = setInterval(() => {
+                    this.updateTimerDisplay();
+                }, 1000);
+            }
+            
+            stopTimer() {
+                this.isRunning = false;
+                const endTime = new Date();
+                
+                // Set end time
+                document.getElementById('end-time').value = this.formatDateTimeLocal(endTime);
+                
+                // Clear timer
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+                
+                // Update UI
+                document.getElementById('start-timer').classList.remove('hidden');
+                document.getElementById('stop-timer').classList.add('hidden');
+                document.getElementById('active-timer').classList.add('hidden');
+                
+                // Calculate final duration
+                this.calculateDuration();
+                
+                // Focus on title field for memo entry
+                document.getElementById('memo-title')?.focus();
+            }
+            
+            updateTimerDisplay() {
+                if (!this.isRunning || !this.startTime) return;
+                
+                const now = new Date();
+                const elapsed = now - this.startTime;
+                const hours = Math.floor(elapsed / (1000 * 60 * 60));
+                const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+                
+                const display = document.getElementById('timer-display');
+                if (display) {
+                    display.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+            }
+        }
+        
+        // Text Truncation Functionality
+        class TextTruncator {
+            static initializeTruncation() {
+                // This will be called after memos are loaded
+                document.querySelectorAll('.memo-description').forEach(element => {
+                    this.addTruncationControls(element);
+                });
+            }
+            
+            static addTruncationControls(element) {
+                const lineHeight = 1.6; // rem
+                const maxLines = 4;
+                const maxHeight = lineHeight * maxLines;
+                
+                // Check if content exceeds max height
+                if (element.scrollHeight > (maxHeight * 16)) { // Convert rem to px (assuming 16px = 1rem)
+                    element.classList.add('truncated');
+                    element.style.maxHeight = `${maxHeight}rem`;
+                    
+                    // Create expand/collapse button
+                    const toggleButton = document.createElement('button');
+                    toggleButton.className = 'expand-toggle';
+                    toggleButton.textContent = 'Show more...';
+                    
+                    toggleButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        if (element.classList.contains('expanded')) {
+                            // Collapse
+                            element.classList.remove('expanded');
+                            element.classList.add('truncated');
+                            element.style.maxHeight = `${maxHeight}rem`;
+                            toggleButton.textContent = 'Show more...';
+                        } else {
+                            // Expand
+                            element.classList.remove('truncated');
+                            element.classList.add('expanded');
+                            element.style.maxHeight = 'none';
+                            toggleButton.textContent = 'Show less';
+                        }
+                    });
+                    
+                    // Insert button after the element
+                    element.parentNode.insertBefore(toggleButton, element.nextSibling);
+                }
+            }
+        }
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.timeTracker = new TimeTracker();
+            window.TextTruncator = TextTruncator;
+        });
+    </script>
+    
     <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';

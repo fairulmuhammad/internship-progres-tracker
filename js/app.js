@@ -226,11 +226,20 @@ class InternshipTracker {
 
     // Get form data
     getFormData() {
+        const startTime = document.getElementById('start-time')?.value;
+        const endTime = document.getElementById('end-time')?.value;
+        const simpleStartTime = document.getElementById('simple-start-time')?.value;
+        const simpleEndTime = document.getElementById('simple-end-time')?.value;
+        
         return {
             date: this.elements.memoDate.value,
             time: this.elements.memoTime.value,
             category: this.elements.memoCategory.value,
             duration: this.elements.memoDuration.value,
+            startTime: startTime ? new Date(startTime).toISOString() : null,
+            endTime: endTime ? new Date(endTime).toISOString() : null,
+            simpleStartTime: simpleStartTime || null,
+            simpleEndTime: simpleEndTime || null,
             title: FormValidator.sanitizeInput(this.elements.memoTitle.value),
             description: FormValidator.sanitizeInput(this.elements.memoDescription.value),
             tags: FormValidator.validateTags(this.elements.memoTags.value).join(', ')
@@ -339,6 +348,36 @@ class InternshipTracker {
         this.elements.memoTitle.value = memo.title;
         this.elements.memoDescription.value = memo.description;
         this.elements.memoTags.value = memo.tags || '';
+        
+        // Populate timestamp fields
+        const startTimeField = document.getElementById('start-time');
+        const endTimeField = document.getElementById('end-time');
+        const simpleStartTimeField = document.getElementById('simple-start-time');
+        const simpleEndTimeField = document.getElementById('simple-end-time');
+        
+        if (startTimeField && memo.startTime) {
+            const startDate = new Date(memo.startTime);
+            startTimeField.value = this.formatDateTimeLocalInput(startDate);
+        }
+        
+        if (endTimeField && memo.endTime) {
+            const endDate = new Date(memo.endTime);
+            endTimeField.value = this.formatDateTimeLocalInput(endDate);
+        }
+        
+        if (simpleStartTimeField && memo.simpleStartTime) {
+            simpleStartTimeField.value = memo.simpleStartTime;
+        }
+        
+        if (simpleEndTimeField && memo.simpleEndTime) {
+            simpleEndTimeField.value = memo.simpleEndTime;
+        }
+        
+        // Recalculate durations if fields are present
+        if (window.timeTracker) {
+            window.timeTracker.calculateDuration();
+            window.timeTracker.calculateSimpleDuration();
+        }
 
         // Set edit mode
         this.currentEditId = id;
@@ -497,6 +536,59 @@ class InternshipTracker {
         
         dateTime.textContent = `${dateText}${timeText}${durationText}`;
         
+        // Add timestamps section if available
+        if (memo.startTime || memo.endTime || memo.simpleStartTime || memo.simpleEndTime) {
+            const timestamps = document.createElement('div');
+            timestamps.className = 'memo-timestamps';
+            
+            // Full datetime timestamps
+            if (memo.startTime) {
+                const startItem = document.createElement('div');
+                startItem.className = 'timestamp-item';
+                startItem.innerHTML = `
+                    <span class="timestamp-label">Started:</span>
+                    <span class="timestamp-value">${this.formatTimestamp(memo.startTime)}</span>
+                `;
+                timestamps.appendChild(startItem);
+            }
+            
+            if (memo.endTime) {
+                const endItem = document.createElement('div');
+                endItem.className = 'timestamp-item';
+                endItem.innerHTML = `
+                    <span class="timestamp-label">Finished:</span>
+                    <span class="timestamp-value">${this.formatTimestamp(memo.endTime)}</span>
+                `;
+                timestamps.appendChild(endItem);
+            }
+            
+            if (memo.startTime && memo.endTime) {
+                const duration = this.calculateDisplayDuration(memo.startTime, memo.endTime);
+                const durationItem = document.createElement('div');
+                durationItem.className = 'timestamp-item';
+                durationItem.innerHTML = `
+                    <span class="timestamp-label">Duration:</span>
+                    <span class="timestamp-value duration-highlight">${duration}</span>
+                `;
+                timestamps.appendChild(durationItem);
+            }
+            
+            // Simple time display
+            if (memo.simpleStartTime || memo.simpleEndTime) {
+                const simpleTimeItem = document.createElement('div');
+                simpleTimeItem.className = 'timestamp-item';
+                const startText = memo.simpleStartTime ? memo.simpleStartTime : '--:--';
+                const endText = memo.simpleEndTime ? memo.simpleEndTime : '--:--';
+                simpleTimeItem.innerHTML = `
+                    <span class="timestamp-label">Time:</span>
+                    <span class="timestamp-value">${startText} → ${endText}</span>
+                `;
+                timestamps.appendChild(simpleTimeItem);
+            }
+            
+            meta.appendChild(timestamps);
+        }
+        
         // Categories and tags
         const categories = document.createElement('div');
         categories.className = 'memo-categories';
@@ -546,7 +638,20 @@ class InternshipTracker {
         // Content
         const content = document.createElement('div');
         content.className = 'memo-content prose';
-        content.innerHTML = uiComponents.markdownToHtml(memo.description);
+        
+        // Create description with truncation support
+        const description = document.createElement('div');
+        description.className = 'memo-description';
+        description.innerHTML = uiComponents.markdownToHtml(memo.description);
+        
+        content.appendChild(description);
+        
+        // Apply text truncation after element is added to DOM
+        setTimeout(() => {
+            if (window.TextTruncator) {
+                window.TextTruncator.addTruncationControls(description);
+            }
+        }, 100);
         
         memoEl.appendChild(header);
         memoEl.appendChild(content);
@@ -558,6 +663,46 @@ class InternshipTracker {
         }
         
         return memoEl;
+    }
+
+    // Format timestamp for display
+    formatTimestamp(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    }
+
+    // Calculate and format duration for display
+    calculateDisplayDuration(startTime, endTime) {
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+        const diffMs = end - start;
+        
+        if (diffMs <= 0) return 'Invalid duration';
+        
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (hours > 0) {
+            return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+        } else {
+            return `${minutes}m`;
+        }
+    }
+
+    // Format date for datetime-local input
+    formatDateTimeLocalInput(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 
     // Create attachments section

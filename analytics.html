@@ -4,9 +4,448 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics Dashboard - Internship Tracker</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/tasks.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    
+    <style>
+        /* Import main styles first */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary-color: #6b7280;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --background-color: #f3f4f6;
+            --card-background: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #d1d5db;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --border-radius: 0.5rem;
+            --border-radius-lg: 0.75rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* App Layout */
+        .app-container {
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .main-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: white;
+        }
+
+        .breadcrumb-separator {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        /* Analytics Page Specific Styles */
+        .analytics-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        /* Stats Section */
+        .stats-section,
+        .task-analytics-section,
+        .timeline-section,
+        .heatmap-section {
+            margin-bottom: 3rem;
+        }
+
+        .stats-section h2,
+        .task-analytics-section h2,
+        .timeline-section h2,
+        .heatmap-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-background);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .stat-content h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .stat-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            background: var(--card-background);
+            border-radius: var(--border-radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        /* Completion Rate Circle */
+        .completion-chart {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .circular-progress {
+            position: relative;
+        }
+
+        .circular-progress svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--success-color);
+        }
+
+        /* Status/Priority Breakdown */
+        .status-breakdown,
+        .priority-breakdown,
+        .category-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .status-item,
+        .priority-item,
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .status-item:last-child,
+        .priority-item:last-child,
+        .category-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-color,
+        .priority-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        /* Status colors matching tasks.html */
+        .status-color.pending { background: var(--secondary-color); }
+        .status-color.in-progress { background: var(--warning-color); }
+        .status-color.completed { background: var(--success-color); }
+
+        /* Priority colors */
+        .priority-color.high { background: var(--error-color); }
+        .priority-color.medium { background: var(--warning-color); }
+        .priority-color.low { background: var(--success-color); }
+
+        .status-label,
+        .priority-label,
+        .category-label {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .status-count,
+        .priority-count,
+        .category-count {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Timeline */
+        .timeline-chart {
+            background: var(--card-background);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .timeline-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: var(--background-color);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .week-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+
+        .week-item:hover {
+            background-color: rgba(79, 70, 229, 0.02);
+        }
+
+        .week-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Activity Heatmap */
+        .heatmap-container {
+            background: var(--card-background);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .heatmap-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2px;
+            max-width: 600px;
+            margin: 0 auto 1.5rem auto;
+        }
+
+        .heatmap-day {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .heatmap-day:hover {
+            transform: scale(1.2);
+        }
+
+        .heatmap-day.level-0 { background: #ebedf0; }
+        .heatmap-day.level-1 { background: #c6e48b; }
+        .heatmap-day.level-2 { background: #7bc96f; }
+        .heatmap-day.level-3 { background: #239a3b; }
+        .heatmap-day.level-4 { background: #196127; }
+
+        .heatmap-legend {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-colors {
+            display: flex;
+            gap: 2px;
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 1px;
+        }
+
+        .legend-color.level-0 { background: #ebedf0; }
+        .legend-color.level-1 { background: #c6e48b; }
+        .legend-color.level-2 { background: #7bc96f; }
+        .legend-color.level-3 { background: #239a3b; }
+        .legend-color.level-4 { background: #196127; }
+
+        /* Auth Status */
+        #auth-status {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+        }
+
+        /* Loading and Error States */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .analytics-page {
+                padding: 0 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline-header,
+            .week-item {
+                grid-template-columns: 2fr 1fr 1fr 1fr;
+                font-size: 0.9rem;
+                padding: 0.75rem 1rem;
+            }
+            
+            .heatmap-grid {
+                grid-template-columns: repeat(7, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .chart-card {
+                padding: 1rem;
+            }
+        }
+    </style>
+    
+    <!-- Firebase Scripts -->
 </head>
 <body>
     <div class="app-container">
@@ -93,8 +532,8 @@
                             <h3>Tasks by Status</h3>
                             <div class="status-breakdown">
                                 <div class="status-item">
-                                    <span class="status-color todo"></span>
-                                    <span class="status-label">To Do</span>
+                                    <span class="status-color pending"></span>
+                                    <span class="status-label">Pending</span>
                                     <span class="status-count" id="todo-status-count">0</span>
                                 </div>
                                 <div class="status-item">
@@ -103,7 +542,7 @@
                                     <span class="status-count" id="in-progress-status-count">0</span>
                                 </div>
                                 <div class="status-item">
-                                    <span class="status-color done"></span>
+                                    <span class="status-color completed"></span>
                                     <span class="status-label">Completed</span>
                                     <span class="status-count" id="done-status-count">0</span>
                                 </div>
@@ -186,63 +625,197 @@
         </main>
     </div>
 
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+        
+        // Make Firebase available globally
+        window.Firebase = {
+            initializeApp,
+            getAuth,
+            getFirestore
+        };
+    </script>
+
     <!-- Scripts -->
     <script type="module">
-        import { authService } from './js/services/auth-service.js';
-        import { storageService } from './js/services/storage-service.js';
-        import { taskService } from './js/services/task-service.js';
-        import { authUI } from './js/components/auth-ui.js';
+        import { 
+            collection, 
+            getDocs, 
+            query, 
+            orderBy, 
+            onSnapshot,
+            where 
+        } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+        
+        import { 
+            onAuthStateChanged,
+            signOut 
+        } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
 
         class AnalyticsDashboard {
             constructor() {
                 this.memos = [];
                 this.tasks = [];
                 this.isInitialized = false;
+                this.db = null;
+                this.auth = null;
+                this.currentUser = null;
             }
 
             async initialize() {
                 try {
-                    // Initialize auth
-                    await authService.initialize();
+                    // Wait for Firebase to be available
+                    await this.waitForFirebase();
                     
-                    // Setup auth UI
-                    authUI.setupAuthUI();
+                    // Initialize Firebase (check if already initialized)
+                    const { getApps } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js');
+                    const existingApps = getApps();
                     
-                    // Check authentication
-                    if (!authService.isAuthenticated) {
-                        window.location.href = 'login.html';
-                        return;
+                    let app;
+                    if (existingApps.length > 0) {
+                        console.log('Using existing Firebase app');
+                        app = existingApps[0];
+                    } else {
+                        console.log('Initializing new Firebase app');
+                        const firebaseConfig = {
+                            apiKey: "AIzaSyBXyDjhD-uewbVQyfBIGF08sVJ6DTypJPU",
+                            authDomain: "internship-tracker-v01.firebaseapp.com",
+                            projectId: "internship-tracker-v01",
+                            storageBucket: "internship-tracker-v01.firebasestorage.app",
+                            messagingSenderId: "33562128425",
+                            appId: "1:33562128425:web:21084944a8360cf6ecec38"
+                        };
+                        app = window.Firebase.initializeApp(firebaseConfig);
                     }
 
-                    // Initialize services
-                    await storageService.initialize(authService);
-                    await taskService.initialize();
-
-                    // Load data
-                    await this.loadData();
+                    this.auth = window.Firebase.getAuth(app);
+                    this.db = window.Firebase.getFirestore(app);
                     
-                    // Render analytics
-                    this.renderAnalytics();
+                    console.log('Firebase initialized successfully');
+                    
+                    // Check current auth state immediately
+                    console.log('Current user on page load:', this.auth.currentUser);
+                    
+                    // Setup auth state listener
+                    onAuthStateChanged(this.auth, async (user) => {
+                        console.log('Auth state changed. User:', user ? user.email : 'No user');
+                        
+                        if (user) {
+                            console.log('User authenticated:', user.email);
+                            this.currentUser = user;
+                            this.setupAuthUI();
+                            await this.loadData();
+                            this.renderAnalytics();
+                        } else {
+                            console.log('No user authenticated. Auth state:', this.auth.currentUser);
+                            
+                            // Wait a bit to see if auth state is still loading
+                            setTimeout(() => {
+                                if (!this.auth.currentUser) {
+                                    console.log('Still no user after timeout, redirecting to login...');
+                                    window.location.href = 'login.html';
+                                }
+                            }, 1000);
+                        }
+                    });
                     
                     this.isInitialized = true;
                     console.log('Analytics dashboard initialized');
                     
                 } catch (error) {
                     console.error('Failed to initialize analytics dashboard:', error);
-                    this.showError('Failed to load analytics data');
+                    this.showError('Failed to load analytics data: ' + error.message);
+                }
+            }
+
+            async waitForFirebase() {
+                let attempts = 0;
+                const maxAttempts = 50;
+                
+                while (!window.Firebase && attempts < maxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+                
+                if (!window.Firebase) {
+                    throw new Error('Firebase not available after waiting');
+                }
+            }
+
+            setupAuthUI() {
+                const authStatus = document.getElementById('auth-status');
+                if (this.currentUser && authStatus) {
+                    authStatus.innerHTML = `
+                        <span>Welcome, ${this.currentUser.displayName || this.currentUser.email}</span>
+                        <button onclick="dashboard.logout()" style="margin-left: 1rem; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                            Logout
+                        </button>
+                    `;
+                }
+            }
+
+            async logout() {
+                try {
+                    await signOut(this.auth);
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
                 }
             }
 
             async loadData() {
                 try {
+                    if (!this.currentUser) return;
+
                     // Load memos
-                    this.memos = await storageService.getAllMemos() || [];
+                    await this.loadMemos();
                     
                     // Load tasks
-                    this.tasks = await taskService.getTasks() || [];
+                    await this.loadTasks();
+                    
+                    console.log('Data loaded:', { 
+                        memos: this.memos.length, 
+                        tasks: this.tasks.length 
+                    });
                     
                 } catch (error) {
                     console.error('Error loading data:', error);
+                    this.showError('Error loading data: ' + error.message);
+                }
+            }
+
+            async loadMemos() {
+                try {
+                    const memosRef = collection(this.db, `users/${this.currentUser.uid}/memos`);
+                    const memosQuery = query(memosRef, orderBy('date', 'desc'));
+                    const snapshot = await getDocs(memosQuery);
+                    
+                    this.memos = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                } catch (error) {
+                    console.error('Error loading memos:', error);
+                    this.memos = [];
+                }
+            }
+
+            async loadTasks() {
+                try {
+                    const tasksRef = collection(this.db, `users/${this.currentUser.uid}/tasks`);
+                    const tasksQuery = query(tasksRef, orderBy('createdAt', 'desc'));
+                    const snapshot = await getDocs(tasksQuery);
+                    
+                    this.tasks = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                } catch (error) {
+                    console.error('Error loading tasks:', error);
+                    this.tasks = [];
                 }
             }
 
@@ -257,51 +830,86 @@
                 // Calculate stats
                 const totalMemos = this.memos.length;
                 const totalTasks = this.tasks.length;
-                const totalHours = this.memos.reduce((sum, memo) => sum + (parseFloat(memo.duration) || 0), 0);
+                const totalHours = this.memos.reduce((sum, memo) => {
+                    const duration = parseFloat(memo.duration) || 0;
+                    return sum + duration;
+                }, 0);
                 const activeDays = new Set(this.memos.map(memo => memo.date)).size;
 
                 // Update DOM
-                document.getElementById('total-memos-stat').textContent = totalMemos;
-                document.getElementById('total-tasks-stat').textContent = totalTasks;
-                document.getElementById('total-hours-stat').textContent = Math.round(totalHours);
-                document.getElementById('active-days-stat').textContent = activeDays;
+                const totalMemosEl = document.getElementById('total-memos-stat');
+                const totalTasksEl = document.getElementById('total-tasks-stat');
+                const totalHoursEl = document.getElementById('total-hours-stat');
+                const activeDaysEl = document.getElementById('active-days-stat');
+
+                if (totalMemosEl) totalMemosEl.textContent = totalMemos.toLocaleString();
+                if (totalTasksEl) totalTasksEl.textContent = totalTasks.toLocaleString();
+                if (totalHoursEl) totalHoursEl.textContent = Math.round(totalHours).toLocaleString();
+                if (activeDaysEl) activeDaysEl.textContent = activeDays.toLocaleString();
             }
 
             renderTaskAnalytics() {
-                if (this.tasks.length === 0) return;
+                if (this.tasks.length === 0) {
+                    // Show empty state
+                    document.getElementById('completion-percentage').textContent = '0%';
+                    return;
+                }
 
-                // Task completion rate
-                const completedTasks = this.tasks.filter(task => task.status === 'done').length;
+                // Task completion rate (matching tasks.html status values)
+                const completedTasks = this.tasks.filter(task => task.status === 'completed').length;
                 const completionRate = Math.round((completedTasks / this.tasks.length) * 100);
                 
-                document.getElementById('completion-percentage').textContent = completionRate + '%';
+                const completionEl = document.getElementById('completion-percentage');
+                if (completionEl) {
+                    completionEl.textContent = completionRate + '%';
+                }
                 
                 // Update progress circle
                 const circle = document.getElementById('progress-circle');
-                const circumference = 314;
-                const offset = circumference - (completionRate / 100) * circumference;
-                circle.style.strokeDashoffset = offset;
+                if (circle) {
+                    const circumference = 314;
+                    const offset = circumference - (completionRate / 100) * circumference;
+                    circle.style.strokeDashoffset = offset;
+                }
 
-                // Status breakdown
+                // Status breakdown (matching tasks.html status values)
                 const statusCounts = this.tasks.reduce((acc, task) => {
-                    acc[task.status] = (acc[task.status] || 0) + 1;
+                    const status = task.status || 'pending';
+                    acc[status] = (acc[status] || 0) + 1;
                     return acc;
                 }, {});
 
-                document.getElementById('todo-status-count').textContent = statusCounts['todo'] || 0;
-                document.getElementById('in-progress-status-count').textContent = statusCounts['in-progress'] || 0;
-                document.getElementById('done-status-count').textContent = statusCounts['done'] || 0;
+                // Map status values to UI elements
+                const pendingEl = document.getElementById('todo-status-count');
+                const inProgressEl = document.getElementById('in-progress-status-count');
+                const completedEl = document.getElementById('done-status-count');
 
-                // Priority breakdown
+                if (pendingEl) pendingEl.textContent = statusCounts['pending'] || 0;
+                if (inProgressEl) inProgressEl.textContent = statusCounts['in-progress'] || 0;
+                if (completedEl) completedEl.textContent = statusCounts['completed'] || 0;
+
+                // Priority breakdown (matching tasks.html priority values)
                 const priorityCounts = this.tasks.reduce((acc, task) => {
-                    acc[task.priority] = (acc[task.priority] || 0) + 1;
+                    const priority = task.priority || 'medium';
+                    acc[priority] = (acc[priority] || 0) + 1;
                     return acc;
                 }, {});
 
-                document.getElementById('critical-priority-count').textContent = priorityCounts['critical'] || 0;
-                document.getElementById('high-priority-count').textContent = priorityCounts['high'] || 0;
-                document.getElementById('medium-priority-count').textContent = priorityCounts['medium'] || 0;
-                document.getElementById('low-priority-count').textContent = priorityCounts['low'] || 0;
+                // Update priority counts (skip critical as it's not used in tasks.html)
+                const highEl = document.getElementById('high-priority-count');
+                const mediumEl = document.getElementById('medium-priority-count');
+                const lowEl = document.getElementById('low-priority-count');
+
+                if (highEl) highEl.textContent = priorityCounts['high'] || 0;
+                if (mediumEl) mediumEl.textContent = priorityCounts['medium'] || 0;
+                if (lowEl) lowEl.textContent = priorityCounts['low'] || 0;
+
+                // Hide critical priority as it's not used in tasks.html
+                const criticalEl = document.getElementById('critical-priority-count');
+                if (criticalEl) {
+                    criticalEl.textContent = '0';
+                    criticalEl.closest('.priority-item').style.display = 'none';
+                }
 
                 // Category breakdown
                 this.renderCategoryBreakdown();
@@ -309,12 +917,20 @@
 
             renderCategoryBreakdown() {
                 const categoryCounts = this.tasks.reduce((acc, task) => {
-                    acc[task.category] = (acc[task.category] || 0) + 1;
+                    const category = task.category || 'General';
+                    acc[category] = (acc[category] || 0) + 1;
                     return acc;
                 }, {});
 
                 const container = document.getElementById('category-breakdown');
+                if (!container) return;
+                
                 container.innerHTML = '';
+
+                if (Object.keys(categoryCounts).length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 1rem;">No categories found</p>';
+                    return;
+                }
 
                 Object.entries(categoryCounts).forEach(([category, count]) => {
                     const categoryItem = document.createElement('div');
@@ -330,7 +946,14 @@
             renderWeeklyProgress() {
                 const weeks = this.getWeeklyData();
                 const container = document.getElementById('weekly-timeline');
+                if (!container) return;
+                
                 container.innerHTML = '';
+
+                if (weeks.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--text-secondary);">No weekly data available</p>';
+                    return;
+                }
 
                 weeks.forEach((week, index) => {
                     const weekItem = document.createElement('div');
@@ -348,6 +971,8 @@
             renderActivityHeatmap() {
                 const heatmapData = this.generateHeatmapData();
                 const container = document.getElementById('activity-heatmap');
+                if (!container) return;
+                
                 container.innerHTML = '';
 
                 heatmapData.forEach(day => {
@@ -375,7 +1000,7 @@
                     });
 
                     const weekTasks = this.tasks.filter(task => {
-                        const taskDate = new Date(task.createdAt);
+                        const taskDate = task.createdAt ? new Date(task.createdAt.toDate()) : new Date();
                         return taskDate >= weekStart && taskDate <= weekEnd;
                     });
 
@@ -402,7 +1027,9 @@
                     const dateString = date.toISOString().split('T')[0];
                     const dayMemos = this.memos.filter(memo => memo.date === dateString).length;
                     const dayTasks = this.tasks.filter(task => {
-                        const taskDate = task.createdAt ? new Date(task.createdAt).toISOString().split('T')[0] : null;
+                        const taskDate = task.createdAt ? 
+                            new Date(task.createdAt.toDate()).toISOString().split('T')[0] : 
+                            null;
                         return taskDate === dateString;
                     }).length;
 
@@ -421,215 +1048,19 @@
 
             showError(message) {
                 console.error(message);
-                // You could show a toast notification here
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = message;
+                document.querySelector('.analytics-page').prepend(errorDiv);
             }
         }
 
-        // Initialize the dashboard
-        const dashboard = new AnalyticsDashboard();
-        dashboard.initialize();
+        // Initialize the dashboard and make it globally available
+        window.dashboard = new AnalyticsDashboard();
+        window.dashboard.initialize();
     </script>
-
-    <style>
-        /* Analytics Page Specific Styles */
-        .analytics-page {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .page-header h1 {
-            font-size: 2.5rem;
-            margin: 0 0 10px 0;
-            color: #2c3e50;
-        }
-
-        .page-header p {
-            color: #6c757d;
-            font-size: 1.1rem;
-            margin: 0;
-        }
-
-        .stats-section,
-        .task-analytics-section,
-        .timeline-section,
-        .heatmap-section {
-            margin-bottom: 40px;
-        }
-
-        .stats-section h2,
-        .task-analytics-section h2,
-        .timeline-section h2,
-        .heatmap-section h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #2c3e50;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 8px;
-        }
-
-        /* Completion Rate Circle */
-        .completion-chart {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .circular-progress {
-            position: relative;
-        }
-
-        .progress-percentage {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #28a745;
-        }
-
-        /* Status/Priority Breakdown */
-        .status-breakdown,
-        .priority-breakdown {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding: 20px;
-        }
-
-        .status-item,
-        .priority-item,
-        .category-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #f1f3f4;
-        }
-
-        .status-color,
-        .priority-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        .status-color.todo { background: #6c757d; }
-        .status-color.in-progress { background: #ffc107; }
-        .status-color.done { background: #28a745; }
-
-        .priority-color.critical { background: #dc3545; }
-        .priority-color.high { background: #fd7e14; }
-        .priority-color.medium { background: #ffc107; }
-        .priority-color.low { background: #28a745; }
-
-        /* Timeline */
-        .timeline-chart {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .timeline-header {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 20px;
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            font-weight: 600;
-            color: #495057;
-        }
-
-        .week-item {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 20px;
-            padding: 12px 20px;
-            border-bottom: 1px solid #f1f3f4;
-        }
-
-        /* Activity Heatmap */
-        .heatmap-container {
-            text-align: center;
-        }
-
-        .heatmap-description {
-            color: #6c757d;
-            margin-bottom: 15px;
-        }
-
-        .heatmap-grid {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 2px;
-            max-width: 600px;
-            margin: 0 auto 15px auto;
-        }
-
-        .heatmap-day {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-            cursor: pointer;
-        }
-
-        .heatmap-day.level-0 { background: #ebedf0; }
-        .heatmap-day.level-1 { background: #c6e48b; }
-        .heatmap-day.level-2 { background: #7bc96f; }
-        .heatmap-day.level-3 { background: #239a3b; }
-        .heatmap-day.level-4 { background: #196127; }
-
-        .heatmap-legend {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.8rem;
-            color: #6c757d;
-        }
-
-        .legend-colors {
-            display: flex;
-            gap: 2px;
-        }
-
-        .legend-color {
-            width: 10px;
-            height: 10px;
-            border-radius: 1px;
-        }
-
-        .legend-color.level-0 { background: #ebedf0; }
-        .legend-color.level-1 { background: #c6e48b; }
-        .legend-color.level-2 { background: #7bc96f; }
-        .legend-color.level-3 { background: #239a3b; }
-        .legend-color.level-4 { background: #196127; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .timeline-header,
-            .week-item {
-                grid-template-columns: 2fr 1fr 1fr 1fr;
-                font-size: 0.9rem;
-            }
-            
-            .heatmap-grid {
-                grid-template-columns: repeat(7, 1fr);
-            }
-        }
-    </style>
+</body>
+</html>
+    </script>
 </body>
 </html>
