@@ -1,5 +1,13 @@
 // Firebase Authentication Service - User management and routing
-import { firebaseConfig } from '../config.js';
+import { 
+    initializeFirebase,
+    signInWithEmail,
+    signUpWithEmail,
+    signOut,
+    resetPassword,
+    onAuthStateChanged,
+    getCurrentUser
+} from '../firebase-service.js';
 
 class AuthService {
     constructor() {
@@ -7,7 +15,6 @@ class AuthService {
         this.auth = null;
         this.isInitialized = false;
         this.authStateCallbacks = [];
-        this.firebaseApp = null;
         
         // Initialize app configuration
         this.appConfig = window.appConfig;
@@ -24,30 +31,21 @@ class AuthService {
         this.checkSessionExpiry = this.checkSessionExpiry.bind(this);
     }
 
-    // Initialize Firebase Auth
+    // Initialize Firebase Auth using centralized service
     async initialize() {
         if (this.isInitialized) {
             return;
         }
 
         try {
-            // Wait for Firebase to be available globally
-            if (!window.Firebase) {
-                throw new Error('Firebase not loaded. Make sure Firebase scripts are included.');
-            }
-
-            // Initialize Firebase app
-            this.firebaseApp = window.Firebase.initializeApp(firebaseConfig);
-            this.auth = window.Firebase.getAuth(this.firebaseApp);
+            // Initialize Firebase using centralized service
+            const { auth } = await initializeFirebase();
+            this.auth = auth;
             
-            // Import auth methods dynamically
-            const authModule = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+            console.log('✅ Auth service initialized with centralized Firebase');
             
-            // Set persistence to keep users logged in
-            await authModule.setPersistence(this.auth, authModule.browserLocalPersistence);
-            
-            // Listen for auth state changes
-            authModule.onAuthStateChanged(this.auth, async (user) => {
+            // Listen for auth state changes using centralized service
+            onAuthStateChanged(async (user) => {
                 this.currentUser = user;
                 this.handleAuthStateChange(user);
                 
@@ -126,14 +124,12 @@ class AuthService {
         }
 
         try {
-            const { createUserWithEmailAndPassword, updateProfile } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+            // Use centralized Firebase service
+            const user = await signUpWithEmail(email, password);
             
-            // Create user account
-            const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
-            const { user } = userCredential;
-            
-            // Update user profile with display name
+            // Update user profile with display name if provided
             if (displayName) {
+                const { updateProfile } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
                 await updateProfile(user, { displayName });
             }
             
@@ -158,10 +154,8 @@ class AuthService {
         }
 
         try {
-            const { signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
-            
-            const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
-            const { user } = userCredential;
+            // Use centralized Firebase service
+            const user = await signInWithEmail(email, password);
             
             console.log('User signed in successfully:', user.email);
             
@@ -217,9 +211,8 @@ class AuthService {
         }
 
         try {
-            const { sendPasswordResetEmail } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
-            
-            await sendPasswordResetEmail(this.auth, email);
+            // Use centralized Firebase service
+            await resetPassword(email);
             
             console.log('Password reset email sent to:', email);
             return 'Password reset email sent! Check your inbox.';
@@ -243,9 +236,8 @@ class AuthService {
             localStorage.removeItem('sessionStartTime');
             localStorage.removeItem('lastActivity');
             
-            const { signOut } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
-            
-            await signOut(this.auth);
+            // Use centralized Firebase service
+            await signOut();
             console.log('User signed out successfully');
             
             // Redirect to login page if requested
