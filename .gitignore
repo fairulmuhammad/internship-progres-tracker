@@ -46,3 +46,8 @@ firebase-debug.*.log
 # Sensitive files (if you decide to use them later)
 .env
 config/secrets.js
+
+# Files with credentials
+tasks_improved.html
+*_credentials.html
+*_config_exposed.html
