@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks - Internship Progress Tracker</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/tasks.css">
+    
+    <style>
+        /* Task-specific styles */
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-title h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 2rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .breadcrumb a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .task-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Task Form Modal */
+        .task-form-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .task-form-modal.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .task-form-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .nav-tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+            background: white;
+        }
+
+        .nav-tab:hover {
+            color: #007bff;
+            background: rgba(0, 123, 255, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Loading and Error States */
+        .loading-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e9ecef;
+            border-left: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin: 20px 0;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            margin: 20px 0;
+        }
+
+        /* User Info */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            font-size: 14px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .user-role {
+            color: #6c757d;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 15px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .page-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .nav-tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .nav-tab {
+                white-space: nowrap;
+                padding: 12px 20px;
+            }
+
+            .task-form-modal {
+                padding: 10px;
+            }
+
+            .task-form-content {
+                margin: 10px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- Page Header -->
+        <header class="page-header">
+            <div class="page-title">
+                <div>
+                    <h1>📋 Task Management</h1>
+                    <div class="breadcrumb">
+                        <a href="dashboard.html">Dashboard</a>
+                        <span>›</span>
+                        <span>Tasks</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="user-avatar">?</div>
+                <div class="user-details">
+                    <div class="user-name" id="user-name">Loading...</div>
+                    <div class="user-role" id="user-role">User</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="tasks">
+                📋 All Tasks
+            </button>
+            <button class="nav-tab" data-tab="kanban">
+                📊 Kanban Board
+            </button>
+            <button class="nav-tab" data-tab="analytics">
+                📈 Analytics
+            </button>
+            <button class="nav-tab" data-tab="settings">
+                ⚙️ Settings
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Tasks Tab -->
+            <div id="tasks-tab" class="tab-content active">
+                <div class="task-section">
+                    <div id="task-list-container">
+                        <!-- Task list will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kanban Board Tab -->
+            <div id="kanban-tab" class="tab-content">
+                <div class="task-section">
+                    <div id="kanban-board-container">
+                        <div class="kanban-board">
+                            <div class="kanban-column" data-status="todo">
+                                <div class="kanban-header">
+                                    <h3>📝 To Do</h3>
+                                    <span class="task-count" id="todo-count">0</span>
+                                </div>
+                                <div class="kanban-tasks" id="todo-tasks">
+                                    <!-- Tasks will be populated here -->
+                                </div>
+                            </div>
+                            <div class="kanban-column" data-status="in-progress">
+                                <div class="kanban-header">
+                                    <h3>🔄 In Progress</h3>
+                                    <span class="task-count" id="in-progress-count">0</span>
+                                </div>
+                                <div class="kanban-tasks" id="in-progress-tasks">
+                                    <!-- Tasks will be populated here -->
+                                </div>
+                            </div>
+                            <div class="kanban-column" data-status="done">
+                                <div class="kanban-header">
+                                    <h3>✅ Done</h3>
+                                    <span class="task-count" id="done-count">0</span>
+                                </div>
+                                <div class="kanban-tasks" id="done-tasks">
+                                    <!-- Tasks will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" class="tab-content">
+                <div class="task-section">
+                    <div id="analytics-container">
+                        <div class="analytics-dashboard">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon">📊</div>
+                                    <div class="stat-content">
+                                        <h3 id="total-tasks-stat">0</h3>
+                                        <p>Total Tasks</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">✅</div>
+                                    <div class="stat-content">
+                                        <h3 id="completed-tasks-stat">0</h3>
+                                        <p>Completed</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🔄</div>
+                                    <div class="stat-content">
+                                        <h3 id="in-progress-tasks-stat">0</h3>
+                                        <p>In Progress</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">📈</div>
+                                    <div class="stat-content">
+                                        <h3 id="completion-rate-stat">0%</h3>
+                                        <p>Completion Rate</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="charts-grid">
+                                <div class="chart-card">
+                                    <h3>Tasks by Category</h3>
+                                    <div id="category-chart" class="chart-placeholder">
+                                        <canvas id="categoryCanvas" width="300" height="200"></canvas>
+                                    </div>
+                                </div>
+                                <div class="chart-card">
+                                    <h3>Tasks by Priority</h3>
+                                    <div id="priority-chart" class="chart-placeholder">
+                                        <canvas id="priorityCanvas" width="300" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="progress-section">
+                                <h3>Weekly Progress</h3>
+                                <div class="weekly-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="weekly-progress-fill" style="width: 0%"></div>
+                                    </div>
+                                    <span id="weekly-progress-text">0 tasks completed this week</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="tab-content">
+                <div class="task-section">
+                    <div id="task-settings-container">
+                        <div class="settings-dashboard">
+                            <div class="settings-section">
+                                <h3>⚙️ Task Management Settings</h3>
+                                
+                                <div class="setting-group">
+                                    <h4>Categories</h4>
+                                    <div class="category-settings">
+                                        <div class="category-list" id="category-list">
+                                            <!-- Categories will be populated here -->
+                                        </div>
+                                        <div class="add-category">
+                                            <input type="text" id="new-category-name" placeholder="New category name" class="form-input">
+                                            <button type="button" id="add-category-btn" class="btn btn-primary">Add Category</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="setting-group">
+                                    <h4>Preferences</h4>
+                                    <div class="preference-settings">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="email-notifications"> 
+                                            <span class="checkmark"></span>
+                                            Email notifications for due dates
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="dark-mode"> 
+                                            <span class="checkmark"></span>
+                                            Dark mode (coming soon)
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="auto-save"> 
+                                            <span class="checkmark"></span>
+                                            Auto-save drafts
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="setting-group">
+                                    <h4>Data Management</h4>
+                                    <div class="data-settings">
+                                        <button type="button" id="export-tasks-btn" class="btn btn-secondary">
+                                            📤 Export Tasks (JSON)
+                                        </button>
+                                        <button type="button" id="import-tasks-btn" class="btn btn-secondary">
+                                            📥 Import Tasks
+                                        </button>
+                                        <input type="file" id="import-file" accept=".json" style="display: none;">
+                                    </div>
+                                </div>
+                                
+                                <div class="setting-group">
+                                    <h4>Account</h4>
+                                    <div class="account-settings">
+                                        <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
+                                        <p><strong>Member since:</strong> <span id="member-since">Loading...</span></p>
+                                        <button type="button" id="sign-out-btn" class="btn btn-danger">
+                                            🚪 Sign Out
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Task Form Modal -->
+        <div class="task-form-modal" id="task-form-modal">
+            <div class="task-form-content">
+                <div id="task-form-container">
+                    <!-- Task form will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="page-loading" class="loading-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 2000;">
+            <div class="spinner"></div>
+            <p>Loading task management system...</p>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+        
+        // Make Firebase available globally
+        window.Firebase = {
+            initializeApp,
+            getAuth,
+            getFirestore
+        };
+    </script>
+    
+    <!-- Main Application Script -->
+    <script type="module">
+        import { authService } from './js/services/auth-service.js';
+        import { initializeTaskService } from './js/services/task-service.js';
+        import { TaskList } from './js/components/task-list.js';
+        import { TaskForm } from './js/components/task-form.js';
+        import './js/config/app-config.js'; // Initialize app config
+        
+        class TaskManager {
+            constructor() {
+                this.taskService = null;
+                this.taskList = null;
+                this.taskForm = null;
+                this.tasks = null;
+                this.currentTab = 'tasks'; // Default to tasks tab
+                this.taskForm = null;
+                this.currentUser = null;
+                this.currentTab = 'tasks';
+                
+                this.init();
+            }
+            
+            async init() {
+                try {
+                    // Wait for authentication
+                    await authService.initialize();
+                    
+                    // Check if user is authenticated
+                    const user = authService.getCurrentUser();
+                    if (!user) {
+                        // Redirect to login if not authenticated
+                        if (window.appConfig) {
+                            window.appConfig.navigateTo('login.html');
+                        } else {
+                            window.location.href = './login.html';
+                        }
+                        return;
+                    }
+                    
+                    this.currentUser = user;
+                    this.updateUserInfo(user);
+                    
+                    // Initialize task service
+                    this.taskService = initializeTaskService(authService);
+                    await this.taskService.initialize();
+                    
+                    // Initialize components
+                    this.initializeComponents();
+                    
+                    // Setup navigation
+                    this.setupNavigation();
+                    
+                    // Hide loading screen
+                    this.hidePageLoading();
+                    
+                    console.log('Task Manager initialized successfully');
+                    
+                } catch (error) {
+                    console.error('Failed to initialize Task Manager:', error);
+                    this.showError('Failed to load task management system');
+                }
+            }
+            
+            updateUserInfo(user) {
+                const userAvatar = document.getElementById('user-avatar');
+                const userName = document.getElementById('user-name');
+                const userRole = document.getElementById('user-role');
+                
+                if (userAvatar) {
+                    userAvatar.textContent = (user.displayName || user.email || '?').charAt(0).toUpperCase();
+                }
+                
+                if (userName) {
+                    userName.textContent = user.displayName || user.email || 'Unknown User';
+                }
+                
+                if (userRole) {
+                    userRole.textContent = 'Developer'; // Could be dynamic based on user preferences
+                }
+            }
+            
+            initializeComponents() {
+                // Initialize Task List
+                const taskListContainer = document.getElementById('task-list-container');
+                if (taskListContainer) {
+                    this.taskList = new TaskList(taskListContainer, this.taskService);
+                    
+                    // Listen for task list events
+                    taskListContainer.addEventListener('showTaskForm', (e) => {
+                        this.showTaskForm(e.detail.taskId);
+                    });
+                    
+                    taskListContainer.addEventListener('showTaskDetails', (e) => {
+                        this.showTaskDetails(e.detail.taskId);
+                    });
+                }
+                
+                // Initialize Task Form
+                const taskFormContainer = document.getElementById('task-form-container');
+                if (taskFormContainer) {
+                    this.taskForm = new TaskForm(taskFormContainer, this.taskService);
+                    
+                    // Listen for form events
+                    taskFormContainer.addEventListener('taskSaved', async (e) => {
+                        this.hideTaskForm();
+                        this.showSuccess(`Task ${e.detail.isEditing ? 'updated' : 'created'} successfully!`);
+                        
+                        // Refresh all task-related views
+                        await this.refreshAllTaskViews();
+                    });
+                    
+                    taskFormContainer.addEventListener('formClosed', () => {
+                        this.hideTaskForm();
+                    });
+                }
+            }
+            
+            setupNavigation() {
+                const navTabs = document.querySelectorAll('.nav-tab');
+                
+                navTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const tabName = tab.dataset.tab;
+                        this.switchTab(tabName);
+                    });
+                });
+            }
+            
+            switchTab(tabName) {
+                // Update active tab
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.tab === tabName);
+                });
+                
+                // Update active content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.toggle('active', content.id === `${tabName}-tab`);
+                });
+                
+                // Initialize tab-specific content when switching
+                switch (tabName) {
+                    case 'tasks':
+                        // Tasks tab is already initialized
+                        break;
+                    case 'kanban':
+                        this.initializeKanbanBoard();
+                        break;
+                    case 'analytics':
+                        this.initializeAnalytics();
+                        break;
+                    case 'settings':
+                        this.initializeSettings();
+                        break;
+                }
+            }
+                
+                this.currentTab = tabName;
+                
+                // Handle tab-specific initialization
+                this.handleTabSwitch(tabName);
+            }
+            
+            handleTabSwitch(tabName) {
+                switch (tabName) {
+                    case 'kanban':
+                        this.initializeKanbanBoard();
+                        break;
+                    case 'analytics':
+                        this.initializeAnalytics();
+                        break;
+                    case 'settings':
+                        this.initializeSettings();
+                        break;
+                }
+            }
+            
+            initializeKanbanBoard() {
+                // Initialize kanban board with drag and drop
+                this.populateKanbanBoard();
+                this.setupKanbanDragAndDrop();
+                console.log('Kanban board initialized');
+            }
+            
+            initializeAnalytics() {
+                // Initialize analytics dashboard
+                this.populateAnalytics();
+                console.log('Analytics dashboard initialized');
+            }
+            
+            initializeSettings() {
+                // Initialize task settings
+                this.populateSettings();
+                this.setupSettingsEventListeners();
+                console.log('Task settings initialized');
+            }
+            
+            async populateKanbanBoard() {
+                try {
+                    // Get current tasks
+                    const tasks = await this.getCurrentTasks();
+                    if (!tasks || tasks.length === 0) {
+                        console.log('No tasks available for Kanban board');
+                        return;
+                    }
+                    
+                    // Group tasks by status
+                    const tasksByStatus = {
+                        'todo': tasks.filter(task => task.status === 'todo'),
+                        'in-progress': tasks.filter(task => task.status === 'in-progress'),
+                        'done': tasks.filter(task => task.status === 'done')
+                    };
+                    
+                    // Update counts
+                    Object.keys(tasksByStatus).forEach(status => {
+                        const countElement = document.getElementById(`${status}-count`);
+                        if (countElement) {
+                            countElement.textContent = tasksByStatus[status].length;
+                        }
+                    });
+                    
+                    // Populate columns
+                    Object.entries(tasksByStatus).forEach(([status, statusTasks]) => {
+                        const container = document.getElementById(`${status}-tasks`);
+                        if (!container) return;
+                        
+                        container.innerHTML = '';
+                        statusTasks.forEach(task => {
+                            const taskCard = this.createKanbanTaskCard(task);
+                            container.appendChild(taskCard);
+                        });
+                    });
+                    
+                    // Refresh drag and drop handlers
+                    this.setupKanbanDragAndDrop();
+                    
+                    console.log('Kanban board populated with', tasks.length, 'tasks');
+                } catch (error) {
+                    console.error('Failed to populate Kanban board:', error);
+                }
+            }
+            
+            createKanbanTaskCard(task) {
+                const card = document.createElement('div');
+                card.className = 'kanban-task-card';
+                card.draggable = true;
+                card.dataset.taskId = task.id;
+                
+                const priorityColors = {
+                    critical: '#dc3545',
+                    high: '#fd7e14', 
+                    medium: '#ffc107',
+                    low: '#28a745'
+                };
+                
+                card.innerHTML = `
+                    <div class="task-priority" style="border-left: 4px solid ${priorityColors[task.priority] || '#6c757d'}"></div>
+                    <h4>${task.title}</h4>
+                    <p class="task-category">${task.category}</p>
+                    <div class="task-meta">
+                        <span class="priority-badge ${task.priority}">${task.priority}</span>
+                        ${task.dueDate ? `<span class="due-date">Due: ${task.dueDate}</span>` : ''}
+                    </div>
+                `;
+                
+                return card;
+            }
+            
+            setupKanbanDragAndDrop() {
+                const columns = document.querySelectorAll('.kanban-tasks');
+                const cards = document.querySelectorAll('.kanban-task-card');
+                
+                // Add drag event listeners to cards
+                cards.forEach(card => {
+                    card.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', card.dataset.taskId);
+                        card.classList.add('dragging');
+                    });
+                    
+                    card.addEventListener('dragend', () => {
+                        card.classList.remove('dragging');
+                    });
+                });
+                
+                // Add drop event listeners to columns
+                columns.forEach(column => {
+                    column.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                    });
+                    
+                    column.addEventListener('drop', async (e) => {
+                        e.preventDefault();
+                        const taskId = e.dataTransfer.getData('text/plain');
+                        const newStatus = column.closest('.kanban-column').dataset.status;
+                        
+                        try {
+                            await this.updateTaskStatus(taskId, newStatus);
+                        } catch (error) {
+                            console.error('Failed to update task status:', error);
+                            this.showMessage('Failed to update task status', 'error');
+                        }
+                    });
+                });
+            }
+            
+            async updateTaskStatus(taskId, newStatus) {
+                if (!this.taskService) return;
+                
+                try {
+                    await this.taskService.updateTask(taskId, { status: newStatus });
+                    this.showMessage('Task status updated successfully', 'success');
+                    await this.refreshAllTaskViews();
+                } catch (error) {
+                    throw error;
+                }
+            }
+            
+            async populateAnalytics() {
+                try {
+                    // Get current tasks
+                    const tasks = await this.getCurrentTasks();
+                    if (!tasks || tasks.length === 0) {
+                        console.log('No tasks available for Analytics');
+                        // Show empty state
+                        document.getElementById('total-tasks-stat').textContent = '0';
+                        document.getElementById('completed-tasks-stat').textContent = '0';
+                        document.getElementById('in-progress-tasks-stat').textContent = '0';
+                        document.getElementById('completion-rate-stat').textContent = '0%';
+                        return;
+                    }
+                    
+                    // Calculate statistics
+                    const stats = {
+                        total: tasks.length,
+                        completed: tasks.filter(task => task.status === 'done').length,
+                        inProgress: tasks.filter(task => task.status === 'in-progress').length,
+                        todo: tasks.filter(task => task.status === 'todo').length
+                    };
+                    
+                    const completionRate = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+                    
+                    // Update DOM elements
+                    document.getElementById('total-tasks-stat').textContent = stats.total;
+                    document.getElementById('completed-tasks-stat').textContent = stats.completed;
+                    document.getElementById('in-progress-tasks-stat').textContent = stats.inProgress;
+                    document.getElementById('completion-rate-stat').textContent = completionRate + '%';
+                    
+                    // Update weekly progress
+                    const thisWeekTasks = this.getThisWeekTasks(tasks);
+                    document.getElementById('weekly-progress-fill').style.width = `${Math.min(thisWeekTasks.length * 10, 100)}%`;
+                    document.getElementById('weekly-progress-text').textContent = `${thisWeekTasks.length} tasks completed this week`;
+                    
+                    // Draw simple charts
+                    this.drawCategoryChart(tasks);
+                    this.drawPriorityChart(tasks);
+                    
+                    console.log('Analytics populated with', tasks.length, 'tasks');
+                } catch (error) {
+                    console.error('Failed to populate Analytics:', error);
+                }
+            }
+            
+            getThisWeekTasks(tasks) {
+                if (!tasks) return [];
+                
+                const now = new Date();
+                const weekStart = new Date(now);
+                weekStart.setDate(weekStart.getDate() - now.getDay());
+                weekStart.setHours(0, 0, 0, 0);
+                
+                return tasks.filter(task => {
+                    if (task.status !== 'done' || !task.completedAt) return false;
+                    const completedDate = new Date(task.completedAt);
+                    return completedDate >= weekStart;
+                });
+            }
+            
+            drawCategoryChart(tasks) {
+                if (!tasks) return;
+                
+                const canvas = document.getElementById('categoryCanvas');
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+                const categories = tasks.reduce((acc, task) => {
+                    acc[task.category] = (acc[task.category] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                // Simple bar chart
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const entries = Object.entries(categories);
+                if (entries.length === 0) return;
+                
+                const maxValue = Math.max(...Object.values(categories));
+                
+                entries.forEach(([category, count], index) => {
+                    const x = 50 + index * 40;
+                    const height = (count / maxValue) * 120;
+                    const y = 160 - height;
+                    
+                    ctx.fillStyle = '#007bff';
+                    ctx.fillRect(x, y, 30, height);
+                    
+                    // Labels
+                    ctx.fillStyle = '#000';
+                    ctx.font = '10px Arial';
+                    ctx.fillText(category.substring(0, 8), x - 5, 180);
+                    ctx.fillText(count.toString(), x + 10, y - 5);
+                });
+            }
+            
+            drawPriorityChart(tasks) {
+                if (!tasks) return;
+                
+                const canvas = document.getElementById('priorityCanvas');
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+                const priorities = tasks.reduce((acc, task) => {
+                    acc[task.priority] = (acc[task.priority] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                const colors = {
+                    critical: '#dc3545',
+                    high: '#fd7e14',
+                    medium: '#ffc107',
+                    low: '#28a745'
+                };
+                
+                // Simple pie chart
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const radius = 70;
+                
+                const total = Object.values(priorities).reduce((sum, count) => sum + count, 0);
+                if (total === 0) return;
+                
+                let currentAngle = 0;
+                
+                Object.entries(priorities).forEach(([priority, count]) => {
+                    const sliceAngle = (count / total) * 2 * Math.PI;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                    ctx.closePath();
+                    ctx.fillStyle = colors[priority] || '#6c757d';
+                    ctx.fill();
+                    
+                    // Label
+                    const labelAngle = currentAngle + sliceAngle / 2;
+                    const labelX = centerX + Math.cos(labelAngle) * (radius + 20);
+                    const labelY = centerY + Math.sin(labelAngle) * (radius + 20);
+                    
+                    ctx.fillStyle = '#000';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(`${priority}: ${count}`, labelX - 20, labelY);
+                    
+                    currentAngle += sliceAngle;
+                });
+            }
+            
+            populateSettings() {
+                // Populate categories
+                this.populateCategories();
+                
+                // Populate user info
+                this.populateUserInfo();
+                
+                // Load preferences
+                this.loadPreferences();
+            }
+            
+            populateCategories() {
+                const categoryList = document.getElementById('category-list');
+                if (!categoryList) return;
+                
+                // Get unique categories from tasks
+                const categories = [...new Set(this.tasks.map(task => task.category))];
+                
+                categoryList.innerHTML = '';
+                categories.forEach(category => {
+                    const categoryTag = document.createElement('div');
+                    categoryTag.className = 'category-tag';
+                    categoryTag.innerHTML = `
+                        ${category}
+                        <button class="remove-category" onclick="this.removeCategory('${category}')">×</button>
+                    `;
+                    categoryList.appendChild(categoryTag);
+                });
+            }
+            
+            populateUserInfo() {
+                if (this.authService && this.authService.currentUser) {
+                    const user = this.authService.currentUser;
+                    document.getElementById('user-email').textContent = user.email || 'N/A';
+                    document.getElementById('member-since').textContent = user.metadata.creationTime ? 
+                        new Date(user.metadata.creationTime).toLocaleDateString() : 'N/A';
+                }
+            }
+            
+            loadPreferences() {
+                // Load preferences from localStorage or user settings
+                const prefs = JSON.parse(localStorage.getItem('taskManagerPreferences') || '{}');
+                
+                document.getElementById('email-notifications').checked = prefs.emailNotifications || false;
+                document.getElementById('dark-mode').checked = prefs.darkMode || false;
+                document.getElementById('auto-save').checked = prefs.autoSave !== false; // default true
+            }
+            
+            setupSettingsEventListeners() {
+                // Add category button
+                document.getElementById('add-category-btn')?.addEventListener('click', () => {
+                    const input = document.getElementById('new-category-name');
+                    const categoryName = input.value.trim();
+                    
+                    if (categoryName) {
+                        // Add to categories (this would typically be saved to backend)
+                        this.addCategory(categoryName);
+                        input.value = '';
+                        this.populateCategories();
+                    }
+                });
+                
+                // Export tasks
+                document.getElementById('export-tasks-btn')?.addEventListener('click', () => {
+                    this.exportTasks();
+                });
+                
+                // Import tasks
+                document.getElementById('import-tasks-btn')?.addEventListener('click', () => {
+                    document.getElementById('import-file').click();
+                });
+                
+                document.getElementById('import-file')?.addEventListener('change', (e) => {
+                    this.importTasks(e.target.files[0]);
+                });
+                
+                // Sign out
+                document.getElementById('sign-out-btn')?.addEventListener('click', async () => {
+                    if (confirm('Are you sure you want to sign out?')) {
+                        await this.authService.signOut();
+                        window.location.href = 'login.html';
+                    }
+                });
+                
+                // Preferences
+                ['email-notifications', 'dark-mode', 'auto-save'].forEach(id => {
+                    document.getElementById(id)?.addEventListener('change', () => {
+                        this.savePreferences();
+                    });
+                });
+            }
+            
+            addCategory(categoryName) {
+                // This would typically save to backend
+                console.log('Adding category:', categoryName);
+            }
+            
+            removeCategory(categoryName) {
+                // This would typically remove from backend
+                console.log('Removing category:', categoryName);
+                this.populateCategories();
+            }
+            
+            exportTasks() {
+                const dataStr = JSON.stringify(this.tasks, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `tasks-export-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                this.showMessage('Tasks exported successfully', 'success');
+            }
+            
+            async importTasks(file) {
+                if (!file) return;
+                
+                try {
+                    const text = await file.text();
+                    const tasks = JSON.parse(text);
+                    
+                    // Validate tasks format
+                    if (Array.isArray(tasks)) {
+                        // Import tasks (this would typically save to backend)
+                        console.log('Importing tasks:', tasks.length);
+                        this.showMessage(`Imported ${tasks.length} tasks successfully`, 'success');
+                        this.refreshTasks();
+                    } else {
+                        throw new Error('Invalid file format');
+                    }
+                } catch (error) {
+                    console.error('Import failed:', error);
+                    this.showMessage('Failed to import tasks', 'error');
+                }
+            }
+            
+            savePreferences() {
+                const prefs = {
+                    emailNotifications: document.getElementById('email-notifications').checked,
+                    darkMode: document.getElementById('dark-mode').checked,
+                    autoSave: document.getElementById('auto-save').checked
+                };
+                
+                localStorage.setItem('taskManagerPreferences', JSON.stringify(prefs));
+                this.showMessage('Preferences saved', 'success');
+            }
+            
+            showTaskForm(taskId = null) {
+                const modal = document.getElementById('task-form-modal');
+                if (modal && this.taskForm) {
+                    modal.classList.add('active');
+                    this.taskForm.show(taskId);
+                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                }
+            }
+            
+            hideTaskForm() {
+                const modal = document.getElementById('task-form-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = ''; // Restore scrolling
+                }
+            }
+            
+            showTaskDetails(taskId) {
+                // TODO: Implement task details modal/page
+                console.log('Show task details for:', taskId);
+            }
+            
+            // Refresh all task-related views
+            async refreshAllTaskViews() {
+                try {
+                    // Reload tasks from the service
+                    this.tasks = await this.taskService.getTasks();
+                    
+                    // Refresh the main task list (if it has a refresh method)
+                    if (this.taskList && this.taskList.refresh) {
+                        this.taskList.refresh();
+                    }
+                    
+                    // Refresh Kanban board if it's the current tab
+                    if (this.currentTab === 'kanban') {
+                        this.populateKanbanBoard();
+                    }
+                    
+                    // Refresh Analytics if it's the current tab
+                    if (this.currentTab === 'analytics') {
+                        this.populateAnalytics();
+                    }
+                    
+                    console.log('All task views refreshed');
+                } catch (error) {
+                    console.error('Failed to refresh task views:', error);
+                }
+            }
+            
+            // Get current tasks (for other methods to use)
+            async getCurrentTasks() {
+                if (!this.tasks) {
+                    this.tasks = await this.taskService.getTasks();
+                }
+                return this.tasks;
+            }
+            
+            hidePageLoading() {
+                const pageLoading = document.getElementById('page-loading');
+                if (pageLoading) {
+                    pageLoading.style.display = 'none';
+                }
+            }
+            
+            showError(message) {
+                this.showMessage(message, 'error');
+            }
+            
+            showSuccess(message) {
+                this.showMessage(message, 'success');
+            }
+            
+            showMessage(message, type = 'info') {
+                // Create toast notification
+                const toast = document.createElement('div');
+                toast.className = `${type}-message`;
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 3000;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    animation: slideInRight 0.3s ease;
+                `;
+                
+                document.body.appendChild(toast);
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    toast.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => {
+                        document.body.removeChild(toast);
+                    }, 300);
+                }, 5000);
+            }
+        }
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize the application
+        new TaskManager();
+    </script>
+</body>
+</html>

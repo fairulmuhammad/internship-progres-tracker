@@ -302,6 +302,9 @@ class InternshipTracker {
         const searchText = this.elements.searchBar.value.toLowerCase();
         const categoryFilter = this.elements.categoryFilter.value;
         const dateFilter = this.elements.dateFilter.value;
+        
+        // Get current filter from the tab system
+        const currentFilter = window.currentFilter ? window.currentFilter() : 'all';
 
         this.filteredMemos = this.memos.filter(memo => {
             const matchesSearch = !searchText || 
@@ -312,10 +315,24 @@ class InternshipTracker {
             const matchesCategory = !categoryFilter || memo.category === categoryFilter;
             const matchesDate = !dateFilter || memo.date === dateFilter;
             
-            return matchesSearch && matchesCategory && matchesDate;
+            // Apply tab filter
+            let matchesTabFilter = true;
+            if (currentFilter === 'internship') {
+                matchesTabFilter = memo.category && memo.category.startsWith('internship-');
+            } else if (currentFilter === 'personal') {
+                matchesTabFilter = memo.category && memo.category.startsWith('personal-');
+            }
+            // 'all' filter shows everything, so no additional filtering needed
+            
+            return matchesSearch && matchesCategory && matchesDate && matchesTabFilter;
         });
 
         this.renderMemos();
+        
+        // Update filter counts if function is available
+        if (window.updateFilterCounts) {
+            window.updateFilterCounts(this.memos);
+        }
     }
 
     // Handle memo actions (edit, delete)
@@ -1304,4 +1321,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Make app available globally for debugging
     window.internshipTracker = app;
+    
+    // Expose functions needed by dashboard filter system
+    window.displayMemos = () => app.applyFilters(); // Use applyFilters instead of renderMemos
+    window.getMemosForFiltering = () => app.memos;
 });

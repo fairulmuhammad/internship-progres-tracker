@@ -28,8 +28,25 @@ export class UIComponents {
     // Create category badge
     createCategoryBadge(category) {
         const badge = document.createElement('span');
-        badge.className = `badge badge-category ${category}`;
-        badge.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        badge.className = 'badge badge-category category';
+        badge.setAttribute('data-category', category);
+        
+        // Format display text for new categories
+        let displayText = category;
+        if (category.startsWith('internship-')) {
+            displayText = '🎓 ' + category.replace('internship-', '').split('-').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        } else if (category.startsWith('personal-')) {
+            displayText = '👤 ' + category.replace('personal-', '').split('-').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        } else {
+            // Legacy categories
+            displayText = category.charAt(0).toUpperCase() + category.slice(1);
+        }
+        
+        badge.textContent = displayText;
         return badge;
     }
 

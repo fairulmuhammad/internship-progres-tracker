@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management - Learning Site</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/tasks.css">
+</head>
+<body>
+    <!-- Page Loading Overlay -->
+    <div id="page-loading" class="page-loading">
+        <div class="loading-spinner"></div>
+        <p>Loading tasks...</p>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>Task Management</h1>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="add-task-btn">
+                    <i class="icon">+</i> Add Task
+                </button>
+                <div class="user-menu">
+                    <span id="user-name">Loading...</span>
+                    <button class="btn btn-secondary" id="logout-btn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="task-nav">
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="tasks">
+                <i class="icon">📋</i> All Tasks
+            </button>
+            <button class="nav-tab" data-tab="kanban">
+                <i class="icon">📊</i> Kanban Board
+            </button>
+            <button class="nav-tab" data-tab="analytics">
+                <i class="icon">📈</i> Analytics
+            </button>
+            <button class="nav-tab" data-tab="settings">
+                <i class="icon">⚙️</i> Settings
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Tasks Tab -->
+        <div class="tab-content active" id="tasks-tab">
+            <div class="task-filters">
+                <div class="filter-group">
+                    <label for="status-filter">Status:</label>
+                    <select id="status-filter">
+                        <option value="">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="priority-filter">Priority:</label>
+                    <select id="priority-filter">
+                        <option value="">All</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <input type="text" id="task-search" placeholder="Search tasks...">
+                </div>
+            </div>
+            <div id="task-list-container">
+                <div class="task-list" id="task-list">
+                    <p class="no-tasks">No tasks found. Create your first task!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kanban Tab -->
+        <div class="tab-content" id="kanban-tab">
+            <div class="kanban-board">
+                <div class="kanban-column" data-status="pending">
+                    <div class="kanban-header">
+                        <h3>To Do</h3>
+                        <span class="task-count" id="pending-count">0</span>
+                    </div>
+                    <div class="kanban-tasks" id="pending-tasks">
+                        <!-- Tasks will be populated here -->
+                    </div>
+                </div>
+                <div class="kanban-column" data-status="in-progress">
+                    <div class="kanban-header">
+                        <h3>In Progress</h3>
+                        <span class="task-count" id="in-progress-count">0</span>
+                    </div>
+                    <div class="kanban-tasks" id="in-progress-tasks">
+                        <!-- Tasks will be populated here -->
+                    </div>
+                </div>
+                <div class="kanban-column" data-status="completed">
+                    <div class="kanban-header">
+                        <h3>Done</h3>
+                        <span class="task-count" id="completed-count">0</span>
+                    </div>
+                    <div class="kanban-tasks" id="completed-tasks">
+                        <!-- Tasks will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div class="tab-content" id="analytics-tab">
+            <div class="analytics-dashboard">
+                <div class="analytics-cards">
+                    <div class="analytics-card">
+                        <h3>Total Tasks</h3>
+                        <div class="metric" id="total-tasks-metric">0</div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Completed</h3>
+                        <div class="metric" id="completed-tasks-metric">0</div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>In Progress</h3>
+                        <div class="metric" id="in-progress-tasks-metric">0</div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Completion Rate</h3>
+                        <div class="metric" id="completion-rate-metric">0%</div>
+                    </div>
+                </div>
+                <div class="analytics-charts">
+                    <div class="chart-container">
+                        <h4>Tasks by Category</h4>
+                        <canvas id="categoryCanvas" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settings-tab">
+            <div class="settings-panel">
+                <h2>Settings</h2>
+                <div class="settings-section">
+                    <h3>Categories</h3>
+                    <div class="category-management">
+                        <div class="add-category">
+                            <input type="text" id="new-category" placeholder="New category name">
+                            <button class="btn btn-primary" id="add-category-btn">Add Category</button>
+                        </div>
+                        <div class="category-list" id="category-list">
+                            <!-- Categories will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Preferences</h3>
+                    <div class="preference-item">
+                        <label>
+                            <input type="checkbox" id="show-completed"> Show completed tasks by default
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Task Form Modal -->
+    <div class="modal-overlay" id="task-form-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Task</h2>
+                <button class="modal-close" id="close-modal">&times;</button>
+            </div>
+            <div id="task-form-container">
+                <!-- Task form will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class TaskManager {
+            constructor() {
+                this.taskService = null;
+                this.tasks = [];
+                this.currentTab = 'tasks';
+                this.currentUser = null;
+                this.init();
+            }
+
+            async init() {
+                try {
+                    console.log('Initializing TaskManager...');
+                    
+                    // Import required services
+                    const [TaskService, AuthService] = await Promise.all([
+                        import('./js/services/task-service.js'),
+                        import('./js/services/auth-service.js')
+                    ]);
+
+                    this.authService = AuthService.default;
+                    await this.authService.initialize();
+
+                    // Check if user is authenticated
+                    this.currentUser = this.authService.getCurrentUser();
+                    if (!this.currentUser) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    // Initialize task service
+                    this.taskService = new TaskService.default();
+                    
+                    // Setup UI
+                    this.setupUI();
+                    
+                    // Load initial data
+                    await this.loadTasks();
+                    
+                    // Hide loading screen
+                    this.hidePageLoading();
+
+                    console.log('TaskManager initialized successfully');
+                } catch (error) {
+                    console.error('Failed to initialize TaskManager:', error);
+                    this.showError('Failed to initialize application. Please refresh the page.');
+                    this.hidePageLoading();
+                }
+            }
+
+            setupUI() {
+                // Setup navigation
+                this.setupNavigation();
+                
+                // Setup user menu
+                this.setupUserMenu();
+                
+                // Setup add task button
+                document.getElementById('add-task-btn').addEventListener('click', () => {
+                    this.showTaskForm();
+                });
+
+                // Setup modal close
+                document.getElementById('close-modal').addEventListener('click', () => {
+                    this.hideTaskForm();
+                });
+
+                // Setup filters
+                this.setupFilters();
+            }
+
+            setupNavigation() {
+                const navTabs = document.querySelectorAll('.nav-tab');
+                navTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const tabName = tab.getAttribute('data-tab');
+                        this.switchTab(tabName);
+                    });
+                });
+            }
+
+            setupUserMenu() {
+                if (this.currentUser) {
+                    document.getElementById('user-name').textContent = 
+                        this.currentUser.displayName || this.currentUser.email || 'User';
+                }
+
+                document.getElementById('logout-btn').addEventListener('click', async () => {
+                    await this.authService.logout();
+                    window.location.href = 'login.html';
+                });
+            }
+
+            setupFilters() {
+                const statusFilter = document.getElementById('status-filter');
+                const priorityFilter = document.getElementById('priority-filter');
+                const searchInput = document.getElementById('task-search');
+
+                const updateFilters = () => {
+                    this.renderTasks();
+                };
+
+                statusFilter.addEventListener('change', updateFilters);
+                priorityFilter.addEventListener('change', updateFilters);
+                searchInput.addEventListener('input', updateFilters);
+            }
+
+            async loadTasks() {
+                try {
+                    this.tasks = await this.taskService.getTasks();
+                    this.renderCurrentTab();
+                } catch (error) {
+                    console.error('Failed to load tasks:', error);
+                    this.showError('Failed to load tasks');
+                }
+            }
+
+            renderCurrentTab() {
+                switch (this.currentTab) {
+                    case 'tasks':
+                        this.renderTasks();
+                        break;
+                    case 'kanban':
+                        this.renderKanban();
+                        break;
+                    case 'analytics':
+                        this.renderAnalytics();
+                        break;
+                    case 'settings':
+                        this.renderSettings();
+                        break;
+                }
+            }
+
+            switchTab(tabName) {
+                // Update navigation
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+                // Update content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+
+                this.currentTab = tabName;
+                this.renderCurrentTab();
+            }
+
+            renderTasks() {
+                const taskList = document.getElementById('task-list');
+                const filteredTasks = this.getFilteredTasks();
+
+                if (filteredTasks.length === 0) {
+                    taskList.innerHTML = '<p class="no-tasks">No tasks found.</p>';
+                    return;
+                }
+
+                taskList.innerHTML = filteredTasks.map(task => `
+                    <div class="task-item" data-id="${task.id}">
+                        <div class="task-content">
+                            <h3 class="task-title">${task.title}</h3>
+                            <p class="task-description">${task.description || ''}</p>
+                            <div class="task-meta">
+                                <span class="task-status status-${task.status}">${task.status}</span>
+                                <span class="task-priority priority-${task.priority}">${task.priority}</span>
+                                <span class="task-category">${task.category}</span>
+                                ${task.dueDate ? `<span class="task-due-date">Due: ${new Date(task.dueDate).toLocaleDateString()}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="taskManager.editTask('${task.id}')">Edit</button>
+                            <button class="btn btn-sm btn-success" onclick="taskManager.toggleTaskStatus('${task.id}')" 
+                                    ${task.status === 'completed' ? 'style="display:none"' : ''}>
+                                Complete
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="taskManager.deleteTask('${task.id}')">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderKanban() {
+                const statusColumns = {
+                    'pending': document.getElementById('pending-tasks'),
+                    'in-progress': document.getElementById('in-progress-tasks'),
+                    'completed': document.getElementById('completed-tasks')
+                };
+
+                // Clear all columns
+                Object.values(statusColumns).forEach(column => {
+                    column.innerHTML = '';
+                });
+
+                // Group tasks by status and render
+                const tasksByStatus = this.tasks.reduce((acc, task) => {
+                    if (!acc[task.status]) acc[task.status] = [];
+                    acc[task.status].push(task);
+                    return acc;
+                }, {});
+
+                Object.entries(statusColumns).forEach(([status, column]) => {
+                    const tasks = tasksByStatus[status] || [];
+                    
+                    // Update count
+                    document.getElementById(`${status.replace('-', '-')}-count`).textContent = tasks.length;
+
+                    if (tasks.length === 0) {
+                        column.innerHTML = '<p class="no-tasks">No tasks</p>';
+                        return;
+                    }
+
+                    column.innerHTML = tasks.map(task => `
+                        <div class="kanban-card" data-id="${task.id}" draggable="true">
+                            <h4>${task.title}</h4>
+                            <p>${task.description || ''}</p>
+                            <div class="kanban-meta">
+                                <span class="priority-${task.priority}">${task.priority}</span>
+                                <span class="category">${task.category}</span>
+                            </div>
+                            ${task.dueDate ? `<div class="due-date">Due: ${new Date(task.dueDate).toLocaleDateString()}</div>` : ''}
+                        </div>
+                    `).join('');
+                });
+
+                // Add drag and drop functionality
+                this.setupKanbanDragDrop();
+            }
+
+            setupKanbanDragDrop() {
+                const cards = document.querySelectorAll('.kanban-card');
+                const columns = document.querySelectorAll('.kanban-tasks');
+
+                cards.forEach(card => {
+                    card.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', card.dataset.id);
+                    });
+                });
+
+                columns.forEach(column => {
+                    column.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                    });
+
+                    column.addEventListener('drop', async (e) => {
+                        e.preventDefault();
+                        const taskId = e.dataTransfer.getData('text/plain');
+                        const newStatus = column.parentElement.dataset.status;
+                        await this.updateTaskStatus(taskId, newStatus);
+                    });
+                });
+            }
+
+            renderAnalytics() {
+                const totalTasks = this.tasks.length;
+                const completedTasks = this.tasks.filter(task => task.status === 'completed').length;
+                const inProgressTasks = this.tasks.filter(task => task.status === 'in-progress').length;
+                const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+                document.getElementById('total-tasks-metric').textContent = totalTasks;
+                document.getElementById('completed-tasks-metric').textContent = completedTasks;
+                document.getElementById('in-progress-tasks-metric').textContent = inProgressTasks;
+                document.getElementById('completion-rate-metric').textContent = `${completionRate}%`;
+
+                // Draw category chart
+                this.drawCategoryChart();
+            }
+
+            drawCategoryChart() {
+                const canvas = document.getElementById('categoryCanvas');
+                if (!canvas) return;
+
+                const ctx = canvas.getContext('2d');
+                const categories = this.tasks.reduce((acc, task) => {
+                    acc[task.category] = (acc[task.category] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const entries = Object.entries(categories);
+                if (entries.length === 0) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#666';
+                    ctx.font = '16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('No tasks to display', canvas.width / 2, canvas.height / 2);
+                    return;
+                }
+
+                // Simple bar chart
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const maxValue = Math.max(...entries.map(([, count]) => count));
+                const barWidth = canvas.width / entries.length;
+                const maxBarHeight = canvas.height - 60;
+
+                entries.forEach(([category, count], index) => {
+                    const barHeight = (count / maxValue) * maxBarHeight;
+                    const x = index * barWidth;
+                    const y = canvas.height - barHeight - 30;
+
+                    // Draw bar
+                    ctx.fillStyle = `hsl(${(index * 60) % 360}, 70%, 50%)`;
+                    ctx.fillRect(x + 10, y, barWidth - 20, barHeight);
+
+                    // Draw label
+                    ctx.fillStyle = '#333';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(category, x + barWidth / 2, canvas.height - 10);
+                    ctx.fillText(count.toString(), x + barWidth / 2, y - 5);
+                });
+            }
+
+            renderSettings() {
+                // This would typically load user preferences
+                console.log('Settings tab rendered');
+            }
+
+            getFilteredTasks() {
+                const statusFilter = document.getElementById('status-filter').value;
+                const priorityFilter = document.getElementById('priority-filter').value;
+                const searchQuery = document.getElementById('task-search').value.toLowerCase();
+
+                return this.tasks.filter(task => {
+                    const matchesStatus = !statusFilter || task.status === statusFilter;
+                    const matchesPriority = !priorityFilter || task.priority === priorityFilter;
+                    const matchesSearch = !searchQuery || 
+                        task.title.toLowerCase().includes(searchQuery) ||
+                        (task.description && task.description.toLowerCase().includes(searchQuery));
+
+                    return matchesStatus && matchesPriority && matchesSearch;
+                });
+            }
+
+            async showTaskForm(taskId = null) {
+                try {
+                    const modal = document.getElementById('task-form-modal');
+                    const container = document.getElementById('task-form-container');
+                    const title = document.getElementById('modal-title');
+
+                    title.textContent = taskId ? 'Edit Task' : 'Add New Task';
+
+                    // Load the task form component
+                    const response = await fetch('./js/components/task-form.js');
+                    const formModule = await response.text();
+                    
+                    // Create a temporary script element to load the form
+                    container.innerHTML = '<div id="task-form"></div>';
+                    
+                    // Initialize the form (simplified version)
+                    this.initializeTaskForm(taskId);
+                    
+                    modal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } catch (error) {
+                    console.error('Failed to load task form:', error);
+                    this.showError('Failed to load task form');
+                }
+            }
+
+            initializeTaskForm(taskId) {
+                const container = document.getElementById('task-form');
+                const task = taskId ? this.tasks.find(t => t.id === taskId) : null;
+
+                container.innerHTML = `
+                    <form id="task-form" class="task-form">
+                        <div class="form-group">
+                            <label for="task-title">Title *</label>
+                            <input type="text" id="task-title" name="title" required value="${task ? task.title : ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="task-description">Description</label>
+                            <textarea id="task-description" name="description">${task ? task.description || '' : ''}</textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="task-category">Category</label>
+                                <select id="task-category" name="category">
+                                    <option value="General" ${task && task.category === 'General' ? 'selected' : ''}>General</option>
+                                    <option value="Work" ${task && task.category === 'Work' ? 'selected' : ''}>Work</option>
+                                    <option value="Personal" ${task && task.category === 'Personal' ? 'selected' : ''}>Personal</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="task-priority">Priority</label>
+                                <select id="task-priority" name="priority">
+                                    <option value="low" ${task && task.priority === 'low' ? 'selected' : ''}>Low</option>
+                                    <option value="medium" ${task && task.priority === 'medium' ? 'selected' : 'selected'}>Medium</option>
+                                    <option value="high" ${task && task.priority === 'high' ? 'selected' : ''}>High</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="task-status">Status</label>
+                                <select id="task-status" name="status">
+                                    <option value="pending" ${!task || task.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="in-progress" ${task && task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                                    <option value="completed" ${task && task.status === 'completed' ? 'selected' : ''}>Completed</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="task-due-date">Due Date</label>
+                                <input type="date" id="task-due-date" name="dueDate" value="${task && task.dueDate ? task.dueDate.split('T')[0] : ''}">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="taskManager.hideTaskForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">${taskId ? 'Update' : 'Create'} Task</button>
+                        </div>
+                    </form>
+                `;
+
+                // Setup form submission
+                document.getElementById('task-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await this.saveTask(taskId);
+                });
+            }
+
+            async saveTask(taskId) {
+                try {
+                    const formData = new FormData(document.getElementById('task-form'));
+                    const taskData = {
+                        title: formData.get('title'),
+                        description: formData.get('description'),
+                        category: formData.get('category'),
+                        priority: formData.get('priority'),
+                        status: formData.get('status'),
+                        dueDate: formData.get('dueDate') || null
+                    };
+
+                    if (taskId) {
+                        await this.taskService.updateTask(taskId, taskData);
+                        this.showSuccess('Task updated successfully!');
+                    } else {
+                        await this.taskService.createTask(taskData);
+                        this.showSuccess('Task created successfully!');
+                    }
+
+                    this.hideTaskForm();
+                    await this.loadTasks();
+                } catch (error) {
+                    console.error('Failed to save task:', error);
+                    this.showError('Failed to save task');
+                }
+            }
+
+            hideTaskForm() {
+                const modal = document.getElementById('task-form-modal');
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            async editTask(taskId) {
+                await this.showTaskForm(taskId);
+            }
+
+            async toggleTaskStatus(taskId) {
+                try {
+                    const task = this.tasks.find(t => t.id === taskId);
+                    if (!task) return;
+
+                    const newStatus = task.status === 'completed' ? 'pending' : 'completed';
+                    await this.updateTaskStatus(taskId, newStatus);
+                } catch (error) {
+                    console.error('Failed to toggle task status:', error);
+                    this.showError('Failed to update task status');
+                }
+            }
+
+            async updateTaskStatus(taskId, newStatus) {
+                try {
+                    await this.taskService.updateTask(taskId, { status: newStatus });
+                    this.showSuccess('Task status updated successfully!');
+                    await this.loadTasks();
+                } catch (error) {
+                    console.error('Failed to update task status:', error);
+                    this.showError('Failed to update task status');
+                }
+            }
+
+            async deleteTask(taskId) {
+                if (!confirm('Are you sure you want to delete this task?')) return;
+
+                try {
+                    await this.taskService.deleteTask(taskId);
+                    this.showSuccess('Task deleted successfully!');
+                    await this.loadTasks();
+                } catch (error) {
+                    console.error('Failed to delete task:', error);
+                    this.showError('Failed to delete task');
+                }
+            }
+
+            hidePageLoading() {
+                const pageLoading = document.getElementById('page-loading');
+                if (pageLoading) {
+                    pageLoading.style.display = 'none';
+                }
+            }
+
+            showError(message) {
+                this.showMessage(message, 'error');
+            }
+
+            showSuccess(message) {
+                this.showMessage(message, 'success');
+            }
+
+            showMessage(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `${type}-message`;
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 3000;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    animation: slideInRight 0.3s ease;
+                    background-color: ${type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#007bff'};
+                    color: white;
+                `;
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => {
+                        if (document.body.contains(toast)) {
+                            document.body.removeChild(toast);
+                        }
+                    }, 300);
+                }, 5000);
+            }
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize the application and make it globally available
+        window.taskManager = new TaskManager();
+    </script>
+</body>
+</html>

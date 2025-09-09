@@ -198,6 +198,147 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* Filter Tabs Styles */
+        .filter-tabs-container {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            background: #f8fafc;
+        }
+        
+        .filter-tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #64748b;
+            position: relative;
+        }
+        
+        .filter-tab:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        
+        .filter-tab.active {
+            background: #ffffff;
+            color: #1e293b;
+            box-shadow: 0 -2px 0 #3b82f6 inset;
+        }
+        
+        .filter-tab.active::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #3b82f6;
+        }
+        
+        .tab-icon {
+            font-size: 1.25rem;
+        }
+        
+        .tab-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .tab-count {
+            background: #e5e7eb;
+            color: #374151;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.125rem 0.5rem;
+            border-radius: 12px;
+            min-width: 1.5rem;
+            text-align: center;
+        }
+        
+        .filter-tab.active .tab-count {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .filter-stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 0.75rem 1rem;
+            background: #ffffff;
+            border-top: 1px solid #f1f5f9;
+        }
+        
+        .filter-stat {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-left: 0.25rem;
+        }
+        
+        /* Enhanced category styling */
+        .memo-item .category {
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Internship categories */
+        .memo-item .category[data-category*="internship"] {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        
+        /* Personal categories */
+        .memo-item .category[data-category*="personal"] {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-tabs {
+                flex-direction: column;
+            }
+            
+            .filter-tab {
+                justify-content: flex-start;
+                padding: 0.75rem 1rem;
+            }
+            
+            .filter-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -273,13 +414,26 @@
                     <div class="form-group">
                         <label for="memo-category" class="form-label">Category</label>
                         <select id="memo-category" class="form-select" required>
-                            <option value="development">Development</option>
-                            <option value="meeting">Meeting</option>
-                            <option value="learning">Learning</option>
-                            <option value="planning">Planning</option>
-                            <option value="testing">Testing</option>
-                            <option value="documentation">Documentation</option>
-                            <option value="other">Other</option>
+                            <optgroup label="🎓 Internship">
+                                <option value="internship-development">Development Work</option>
+                                <option value="internship-meeting">Meetings</option>
+                                <option value="internship-learning">Learning/Training</option>
+                                <option value="internship-planning">Project Planning</option>
+                                <option value="internship-testing">Testing</option>
+                                <option value="internship-documentation">Documentation</option>
+                                <option value="internship-review">Code Review</option>
+                                <option value="internship-presentation">Presentations</option>
+                            </optgroup>
+                            <optgroup label="👤 Personal">
+                                <option value="personal-study">Personal Study</option>
+                                <option value="personal-project">Side Projects</option>
+                                <option value="personal-exercise">Exercise/Health</option>
+                                <option value="personal-social">Social Activities</option>
+                                <option value="personal-hobby">Hobbies</option>
+                                <option value="personal-chores">Daily Chores</option>
+                                <option value="personal-reflection">Self Reflection</option>
+                                <option value="personal-other">Other Personal</option>
+                            </optgroup>
                         </select>
                     </div>
                     <div class="form-group">
@@ -303,7 +457,7 @@
                             <button type="button" id="set-end-now" class="btn btn-sm btn-secondary mt-1">Set to Now</button>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Calculated Duration</label>
+                            <label for="calculated-duration" class="form-label">Calculated Duration</label>
                             <div id="calculated-duration" class="duration-display">--:-- hours</div>
                             <div class="time-tracking-actions">
                                 <button type="button" id="start-timer" class="btn btn-sm btn-primary">▶️ Start Working</button>
@@ -332,7 +486,7 @@
                             <button type="button" id="set-simple-end-now" class="btn btn-sm btn-secondary mt-1">Current Time</button>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Simple Duration</label>
+                            <label for="simple-calculated-duration" class="form-label">Simple Duration</label>
                             <div id="simple-calculated-duration" class="duration-display">--:-- hours</div>
                         </div>
                     </div>
@@ -417,18 +571,62 @@
             </div>
         </div>
 
+        <!-- Category Filter Tabs -->
+        <div class="filter-tabs-container">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">
+                    <span class="tab-icon">📋</span>
+                    <span class="tab-text">All</span>
+                    <span class="tab-count" id="count-all">0</span>
+                </button>
+                <button class="filter-tab" data-filter="internship">
+                    <span class="tab-icon">🎓</span>
+                    <span class="tab-text">Internship</span>
+                    <span class="tab-count" id="count-internship">0</span>
+                </button>
+                <button class="filter-tab" data-filter="personal">
+                    <span class="tab-icon">👤</span>
+                    <span class="tab-text">Personal</span>
+                    <span class="tab-count" id="count-personal">0</span>
+                </button>
+            </div>
+            <div class="filter-stats">
+                <div class="filter-stat">
+                    <span class="stat-label">Today:</span>
+                    <span class="stat-value" id="today-filtered-hours">0h</span>
+                </div>
+                <div class="filter-stat">
+                    <span class="stat-label">This Week:</span>
+                    <span class="stat-value" id="week-filtered-hours">0h</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Search and Filter -->
         <div class="search-filters">
             <input type="text" id="search-bar" placeholder="Search memos..." class="form-input search-input">
             <select id="category-filter" class="form-select">
                 <option value="">All Categories</option>
-                <option value="development">Development</option>
-                <option value="meeting">Meeting</option>
-                <option value="learning">Learning</option>
-                <option value="planning">Planning</option>
-                <option value="testing">Testing</option>
-                <option value="documentation">Documentation</option>
-                <option value="other">Other</option>
+                <optgroup label="🎓 Internship">
+                    <option value="internship-development">Development Work</option>
+                    <option value="internship-meeting">Meetings</option>
+                    <option value="internship-learning">Learning/Training</option>
+                    <option value="internship-planning">Project Planning</option>
+                    <option value="internship-testing">Testing</option>
+                    <option value="internship-documentation">Documentation</option>
+                    <option value="internship-review">Code Review</option>
+                    <option value="internship-presentation">Presentations</option>
+                </optgroup>
+                <optgroup label="👤 Personal">
+                    <option value="personal-study">Personal Study</option>
+                    <option value="personal-project">Side Projects</option>
+                    <option value="personal-exercise">Exercise/Health</option>
+                    <option value="personal-social">Social Activities</option>
+                    <option value="personal-hobby">Hobbies</option>
+                    <option value="personal-chores">Daily Chores</option>
+                    <option value="personal-reflection">Self Reflection</option>
+                    <option value="personal-other">Other Personal</option>
+                </optgroup>
             </select>
             <input type="date" id="date-filter" class="form-input">
         </div>
@@ -718,7 +916,133 @@
         document.addEventListener('DOMContentLoaded', () => {
             window.timeTracker = new TimeTracker();
             window.TextTruncator = TextTruncator;
+            
+            // Initialize filter system
+            initializeFilterTabs();
+            
+            // Make currentFilter available globally
+            window.currentFilter = () => currentFilter;
         });
+        
+        // Filter System
+        let currentFilter = 'all';
+        
+        function initializeFilterTabs() {
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+                    
+                    // Get filter value
+                    currentFilter = tab.dataset.filter;
+                    
+                    // Update category filter dropdown
+                    updateCategoryFilterDefault(currentFilter);
+                    
+                    // Apply filter and update display
+                    filterAndDisplayMemos();
+                });
+            });
+        }
+        
+        function updateCategoryFilterDefault(filter) {
+            const categoryFilter = document.getElementById('category-filter');
+            const memoCategory = document.getElementById('memo-category');
+            
+            // Reset category filter dropdown to show all categories for the selected type
+            if (categoryFilter) {
+                categoryFilter.value = ''; // Reset to "All Categories"
+            }
+            
+            if (filter === 'internship') {
+                // Set default to first internship category for new memos
+                if (memoCategory) {
+                    memoCategory.value = 'internship-development';
+                }
+            } else if (filter === 'personal') {
+                // Set default to first personal category for new memos
+                if (memoCategory) {
+                    memoCategory.value = 'personal-study';
+                }
+            } else {
+                // For "All" filter, set to the first option
+                if (memoCategory) {
+                    memoCategory.value = 'internship-development';
+                }
+            }
+        }
+        
+        function filterAndDisplayMemos() {
+            // This function will be called by app.js when memos are loaded
+            // We'll need to update app.js to support the new filtering
+            if (window.displayMemos) {
+                window.displayMemos();
+            } else {
+                // If app.js hasn't loaded yet, wait a bit and try again
+                setTimeout(filterAndDisplayMemos, 100);
+            }
+        }
+        
+        function updateFilterCounts(memos) {
+            if (!memos) return;
+            
+            let allCount = 0;
+            let internshipCount = 0;
+            let personalCount = 0;
+            let todayInternshipHours = 0;
+            let todayPersonalHours = 0;
+            let weekInternshipHours = 0;
+            let weekPersonalHours = 0;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            
+            memos.forEach(memo => {
+                allCount++;
+                
+                const isInternship = memo.category && memo.category.startsWith('internship-');
+                const isPersonal = memo.category && memo.category.startsWith('personal-');
+                const isToday = memo.date === today;
+                const isThisWeek = memo.date >= weekAgo;
+                const duration = parseFloat(memo.duration) || 0;
+                
+                if (isInternship) {
+                    internshipCount++;
+                    if (isToday) todayInternshipHours += duration;
+                    if (isThisWeek) weekInternshipHours += duration;
+                } else if (isPersonal) {
+                    personalCount++;
+                    if (isToday) todayPersonalHours += duration;
+                    if (isThisWeek) weekPersonalHours += duration;
+                }
+            });
+            
+            // Update counts
+            document.getElementById('count-all').textContent = allCount;
+            document.getElementById('count-internship').textContent = internshipCount;
+            document.getElementById('count-personal').textContent = personalCount;
+            
+            // Update filtered stats based on current filter
+            const todayFiltered = currentFilter === 'internship' ? todayInternshipHours : 
+                                 currentFilter === 'personal' ? todayPersonalHours : 
+                                 todayInternshipHours + todayPersonalHours;
+                                 
+            const weekFiltered = currentFilter === 'internship' ? weekInternshipHours : 
+                                currentFilter === 'personal' ? weekPersonalHours : 
+                                weekInternshipHours + weekPersonalHours;
+            
+            document.getElementById('today-filtered-hours').textContent = `${todayFiltered.toFixed(1)}h`;
+            document.getElementById('week-filtered-hours').textContent = `${weekFiltered.toFixed(1)}h`;
+        }
+        
+        // Make filter functions available globally
+        window.currentFilter = () => currentFilter;
+        window.updateFilterCounts = updateFilterCounts;
     </script>
     
     <!-- Firebase Scripts -->
