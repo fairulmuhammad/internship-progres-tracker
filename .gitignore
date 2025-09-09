@@ -47,6 +47,9 @@ firebase-debug.*.log
 .env
 config/secrets.js
 
+# Firebase configuration with secrets
+js/config.js
+
 # Files with credentials
 tasks_improved.html
 *_credentials.html

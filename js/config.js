@@ -1,8 +1,8 @@
-// Firebase Configuration
-// These are safe to expose publicly as they're client-side keys
-// For production, consider using environment variables
+// Firebase Configuration Template
+// SECURITY WARNING: Replace with your NEW API key
+// This file should be in .gitignore to prevent exposure
 export const firebaseConfig = {
-    apiKey: "AIzaSyBXyDjhD-uewbVQyfBIGF08sVJ6DTypJPU",
+    apiKey: "YOUR_NEW_API_KEY_HERE", // Replace with new key from Firebase Console
     authDomain: "internship-tracker-v01.firebaseapp.com",
     projectId: "internship-tracker-v01",
     storageBucket: "internship-tracker-v01.firebasestorage.app",
