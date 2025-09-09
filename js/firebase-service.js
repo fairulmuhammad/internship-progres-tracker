@@ -79,6 +79,62 @@ export async function signInWithEmail(email, password) {
     }
 }
 
+export async function signInWithGoogle() {
+    try {
+        const { signInWithPopup, GoogleAuthProvider } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+        const { auth } = await initializeFirebase();
+        
+        const provider = new GoogleAuthProvider();
+        const userCredential = await signInWithPopup(auth, provider);
+        console.log('✅ User signed in with Google:', userCredential.user.email);
+        return userCredential.user;
+    } catch (error) {
+        console.error('❌ Google sign in failed:', error);
+        throw error;
+    }
+}
+
+/**
+ * Account Linking Methods - Allow users to link multiple auth methods to same account
+ */
+export async function linkEmailPassword(email, password) {
+    try {
+        const { EmailAuthProvider, linkWithCredential } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+        const user = await getCurrentUser();
+        
+        if (!user) {
+            throw new Error('No user is currently signed in');
+        }
+        
+        const credential = EmailAuthProvider.credential(email, password);
+        const result = await linkWithCredential(user, credential);
+        console.log('✅ Email/password linked to account:', result.user.email);
+        return result.user;
+    } catch (error) {
+        console.error('❌ Account linking failed:', error);
+        throw error;
+    }
+}
+
+export async function linkGoogleAccount() {
+    try {
+        const { GoogleAuthProvider, linkWithPopup } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+        const user = await getCurrentUser();
+        
+        if (!user) {
+            throw new Error('No user is currently signed in');
+        }
+        
+        const provider = new GoogleAuthProvider();
+        const result = await linkWithPopup(user, provider);
+        console.log('✅ Google account linked:', result.user.email);
+        return result.user;
+    } catch (error) {
+        console.error('❌ Google account linking failed:', error);
+        throw error;
+    }
+}
+
 export async function signOut() {
     try {
         const { signOut: firebaseSignOut } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');

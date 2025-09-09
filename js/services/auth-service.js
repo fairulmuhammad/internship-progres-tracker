@@ -3,10 +3,13 @@ import {
     initializeFirebase,
     signInWithEmail,
     signUpWithEmail,
+    signInWithGoogle,
     signOut,
     resetPassword,
     onAuthStateChanged,
-    getCurrentUser
+    getCurrentUser,
+    linkEmailPassword,
+    linkGoogleAccount
 } from '../firebase-service.js';
 
 class AuthService {
@@ -146,7 +149,7 @@ class AuthService {
             
             // Handle email already in use (including Google accounts)
             if (error.code === 'auth/email-already-in-use') {
-                throw new Error('An account with this email already exists. Try signing in instead, or use Google Sign-in if you registered with Google.');
+                throw new Error('An account with this email already exists. You can:\n\n1. Sign in with your existing password\n2. Use Google Sign-in if you registered with Google\n3. Reset your password if forgotten\n\nNote: All methods access the same account data.');
             }
             
             throw new Error(this.getReadableErrorMessage(error.code));
@@ -171,9 +174,9 @@ class AuthService {
         } catch (error) {
             console.error('Login error:', error);
             
-            // Handle account exists with different credential
+            // Handle account exists with different credential - offer account linking
             if (error.code === 'auth/account-exists-with-different-credential') {
-                throw new Error('This email is already registered with Google Sign-in. Please use the "Sign in with Google" button instead.');
+                throw new Error('This email is already registered with Google Sign-in. You can:\n\n1. Sign in with Google, or\n2. Contact support to link your accounts\n\nNote: Both methods will access the same account data.');
             }
             
             throw new Error(this.getReadableErrorMessage(error.code));
@@ -187,29 +190,23 @@ class AuthService {
         }
 
         try {
-            const { signInWithPopup, GoogleAuthProvider } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+            // Use centralized Firebase service
+            const user = await signInWithGoogle();
             
-            const provider = new GoogleAuthProvider();
-            provider.addScope('profile');
-            provider.addScope('email');
-            
-            const result = await signInWithPopup(this.auth, provider);
-            const { user } = result;
-            
-            console.log('Google sign-in successful:', user.displayName);
+            console.log('User signed in with Google:', user.email);
             
             // Redirect will happen automatically via auth state change
             return user;
             
         } catch (error) {
-            console.error('Google sign-in error:', error);
+            console.error('Google sign in error:', error);
             
             if (error.code === 'auth/popup-closed-by-user') {
                 throw new Error('Sign-in cancelled');
             } else if (error.code === 'auth/unauthorized-domain') {
-                throw new Error('This domain is not authorized for Google Sign-in.\n\nTo fix this:\n1. Go to Firebase Console\n2. Authentication → Settings → Authorized domains\n3. Add "localhost" to the list\n\nSee docs/firebase-setup.md for detailed instructions.');
+                throw new Error('This domain is not authorized for Google Sign-in. Please check Firebase Console settings.');
             } else if (error.code === 'auth/operation-not-allowed') {
-                throw new Error('Google Sign-in is not enabled.\n\nTo fix this:\n1. Go to Firebase Console\n2. Authentication → Sign-in method\n3. Enable Google provider\n\nSee docs/firebase-setup.md for detailed instructions.');
+                throw new Error('Google Sign-in is not enabled. Please check Firebase Console settings.');
             }
             
             throw new Error(this.getReadableErrorMessage(error.code));
@@ -322,7 +319,7 @@ class AuthService {
         const errorMessages = {
             'auth/user-not-found': 'No account found with this email address',
             'auth/wrong-password': 'Incorrect password',
-            'auth/email-already-in-use': 'An account with this email already exists',
+            'auth/email-already-in-use': 'An account with this email already exists. Try signing in instead.',
             'auth/weak-password': 'Password should be at least 6 characters long',
             'auth/invalid-email': 'Please enter a valid email address',
             'auth/too-many-requests': 'Too many failed attempts. Please try again later',
@@ -334,7 +331,7 @@ class AuthService {
             'auth/popup-closed-by-user': 'Sign-in cancelled',
             'auth/unauthorized-domain': 'This domain is not authorized for Google Sign-in. Please check Firebase Console settings.',
             'auth/operation-not-allowed': 'This sign-in method is not enabled. Please check Firebase Console settings.',
-            'auth/account-exists-with-different-credential': 'An account already exists with this email using a different sign-in method. Try signing in with Google instead, or use a different email.',
+            'auth/account-exists-with-different-credential': 'This email is registered with a different sign-in method. Both methods access the same account data.',
             'auth/credential-already-in-use': 'This credential is already associated with a different user account.',
             'session-expired': 'Your session has expired. Please sign in again.',
             'session-inactive': 'You have been signed out due to inactivity.'
