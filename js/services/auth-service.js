@@ -143,6 +143,12 @@ class AuthService {
             
         } catch (error) {
             console.error('Signup error:', error);
+            
+            // Handle email already in use (including Google accounts)
+            if (error.code === 'auth/email-already-in-use') {
+                throw new Error('An account with this email already exists. Try signing in instead, or use Google Sign-in if you registered with Google.');
+            }
+            
             throw new Error(this.getReadableErrorMessage(error.code));
         }
     }
@@ -164,6 +170,12 @@ class AuthService {
             
         } catch (error) {
             console.error('Login error:', error);
+            
+            // Handle account exists with different credential
+            if (error.code === 'auth/account-exists-with-different-credential') {
+                throw new Error('This email is already registered with Google Sign-in. Please use the "Sign in with Google" button instead.');
+            }
+            
             throw new Error(this.getReadableErrorMessage(error.code));
         }
     }
@@ -322,6 +334,8 @@ class AuthService {
             'auth/popup-closed-by-user': 'Sign-in cancelled',
             'auth/unauthorized-domain': 'This domain is not authorized for Google Sign-in. Please check Firebase Console settings.',
             'auth/operation-not-allowed': 'This sign-in method is not enabled. Please check Firebase Console settings.',
+            'auth/account-exists-with-different-credential': 'An account already exists with this email using a different sign-in method. Try signing in with Google instead, or use a different email.',
+            'auth/credential-already-in-use': 'This credential is already associated with a different user account.',
             'session-expired': 'Your session has expired. Please sign in again.',
             'session-inactive': 'You have been signed out due to inactivity.'
         };
