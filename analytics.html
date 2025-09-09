@@ -115,6 +115,66 @@
             margin: 0;
         }
 
+        /* Analytics Filter Tabs */
+        .analytics-filter-tabs {
+            margin: 2rem 0;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            background: #f8fafc;
+        }
+        
+        .filter-tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #64748b;
+            position: relative;
+        }
+        
+        .filter-tab:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        
+        .filter-tab.active {
+            background: #ffffff;
+            color: #1e293b;
+            box-shadow: 0 -2px 0 #4f46e5 inset;
+        }
+        
+        .filter-tab.active::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #4f46e5;
+        }
+        
+        .tab-icon {
+            font-size: 1.25rem;
+        }
+        
+        .tab-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
         /* Stats Section */
         .stats-section,
         .task-analytics-section,
@@ -475,6 +535,24 @@
                     <p>Comprehensive overview of your internship progress and task management</p>
                 </div>
 
+                <!-- Analytics Filter Tabs -->
+                <div class="analytics-filter-tabs">
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all">
+                            <span class="tab-icon">📊</span>
+                            <span class="tab-text">All Data</span>
+                        </button>
+                        <button class="filter-tab" data-filter="internship">
+                            <span class="tab-icon">🎓</span>
+                            <span class="tab-text">Internship</span>
+                        </button>
+                        <button class="filter-tab" data-filter="personal">
+                            <span class="tab-icon">👤</span>
+                            <span class="tab-text">Personal</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Overview Stats -->
                 <section class="stats-section">
                     <h2>📈 Overview</h2>
@@ -663,6 +741,7 @@
                 this.db = null;
                 this.auth = null;
                 this.currentUser = null;
+                this.currentFilter = 'all'; // Add filter tracking
             }
 
             async initialize() {
@@ -707,6 +786,7 @@
                             console.log('User authenticated:', user.email);
                             this.currentUser = user;
                             this.setupAuthUI();
+                            this.setupFilters(); // Add filter setup
                             await this.loadData();
                             this.renderAnalytics();
                         } else {
@@ -757,6 +837,26 @@
                 }
             }
 
+            setupFilters() {
+                const filterTabs = document.querySelectorAll('.filter-tab');
+                
+                filterTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        // Remove active class from all tabs
+                        filterTabs.forEach(t => t.classList.remove('active'));
+                        
+                        // Add active class to clicked tab
+                        tab.classList.add('active');
+                        
+                        // Update current filter
+                        this.currentFilter = tab.dataset.filter;
+                        
+                        // Re-render analytics with new filter
+                        this.renderAnalytics();
+                    });
+                });
+            }
+
             async logout() {
                 try {
                     await signOut(this.auth);
@@ -789,6 +889,13 @@
 
             async loadMemos() {
                 try {
+                    if (!this.currentUser) {
+                        console.log('No user authenticated for loading memos');
+                        this.memos = [];
+                        return;
+                    }
+                    
+                    console.log('Loading memos for user:', this.currentUser.uid);
                     const memosRef = collection(this.db, `users/${this.currentUser.uid}/memos`);
                     const memosQuery = query(memosRef, orderBy('date', 'desc'));
                     const snapshot = await getDocs(memosQuery);
@@ -797,6 +904,8 @@
                         id: doc.id,
                         ...doc.data()
                     }));
+                    
+                    console.log(`Loaded ${this.memos.length} memos:`, this.memos);
                 } catch (error) {
                     console.error('Error loading memos:', error);
                     this.memos = [];
@@ -805,6 +914,13 @@
 
             async loadTasks() {
                 try {
+                    if (!this.currentUser) {
+                        console.log('No user authenticated for loading tasks');
+                        this.tasks = [];
+                        return;
+                    }
+                    
+                    console.log('Loading tasks for user:', this.currentUser.uid);
                     const tasksRef = collection(this.db, `users/${this.currentUser.uid}/tasks`);
                     const tasksQuery = query(tasksRef, orderBy('createdAt', 'desc'));
                     const snapshot = await getDocs(tasksQuery);
@@ -813,13 +929,36 @@
                         id: doc.id,
                         ...doc.data()
                     }));
+                    
+                    console.log(`Loaded ${this.tasks.length} tasks:`, this.tasks);
                 } catch (error) {
                     console.error('Error loading tasks:', error);
                     this.tasks = [];
                 }
             }
 
+            // Filter methods
+            getFilteredMemos() {
+                if (this.currentFilter === 'all') {
+                    return this.memos;
+                } else if (this.currentFilter === 'internship') {
+                    return this.memos.filter(memo => memo.category && memo.category.startsWith('internship-'));
+                } else if (this.currentFilter === 'personal') {
+                    return this.memos.filter(memo => memo.category && memo.category.startsWith('personal-'));
+                }
+                return this.memos;
+            }
+
+            getFilteredTasks() {
+                // For now, tasks don't have categories, so return all tasks
+                // You could enhance this later if tasks get category support
+                return this.tasks;
+            }
+
             renderAnalytics() {
+                console.log(`Rendering analytics with filter: ${this.currentFilter}`);
+                console.log(`Total data: ${this.memos.length} memos, ${this.tasks.length} tasks`);
+                
                 this.renderOverviewStats();
                 this.renderTaskAnalytics();
                 this.renderWeeklyProgress();
@@ -827,14 +966,18 @@
             }
 
             renderOverviewStats() {
-                // Calculate stats
-                const totalMemos = this.memos.length;
-                const totalTasks = this.tasks.length;
-                const totalHours = this.memos.reduce((sum, memo) => {
+                // Get filtered data
+                const filteredMemos = this.getFilteredMemos();
+                const filteredTasks = this.getFilteredTasks();
+                
+                // Calculate stats from filtered data
+                const totalMemos = filteredMemos.length;
+                const totalTasks = filteredTasks.length;
+                const totalHours = filteredMemos.reduce((sum, memo) => {
                     const duration = parseFloat(memo.duration) || 0;
                     return sum + duration;
                 }, 0);
-                const activeDays = new Set(this.memos.map(memo => memo.date)).size;
+                const activeDays = new Set(filteredMemos.map(memo => memo.date)).size;
 
                 // Update DOM
                 const totalMemosEl = document.getElementById('total-memos-stat');
@@ -916,9 +1059,28 @@
             }
 
             renderCategoryBreakdown() {
-                const categoryCounts = this.tasks.reduce((acc, task) => {
-                    const category = task.category || 'General';
-                    acc[category] = (acc[category] || 0) + 1;
+                // Use filtered memos instead of tasks for category breakdown
+                const filteredMemos = this.getFilteredMemos();
+                
+                const categoryCounts = filteredMemos.reduce((acc, memo) => {
+                    let category = memo.category || 'Other';
+                    
+                    // Format category display name for new category system
+                    let displayCategory = category;
+                    if (category.startsWith('internship-')) {
+                        displayCategory = '🎓 ' + category.replace('internship-', '').split('-').map(word => 
+                            word.charAt(0).toUpperCase() + word.slice(1)
+                        ).join(' ');
+                    } else if (category.startsWith('personal-')) {
+                        displayCategory = '👤 ' + category.replace('personal-', '').split('-').map(word => 
+                            word.charAt(0).toUpperCase() + word.slice(1)
+                        ).join(' ');
+                    } else {
+                        // Legacy categories
+                        displayCategory = category.charAt(0).toUpperCase() + category.slice(1);
+                    }
+                    
+                    acc[displayCategory] = (acc[displayCategory] || 0) + 1;
                     return acc;
                 }, {});
 
@@ -932,7 +1094,10 @@
                     return;
                 }
 
-                Object.entries(categoryCounts).forEach(([category, count]) => {
+                // Sort categories by count (descending)
+                const sortedCategories = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
+
+                sortedCategories.forEach(([category, count]) => {
                     const categoryItem = document.createElement('div');
                     categoryItem.className = 'category-item';
                     categoryItem.innerHTML = `
@@ -955,15 +1120,32 @@
                     return;
                 }
 
+                // Add some visual enhancements and date labels
+                const now = new Date();
                 weeks.forEach((week, index) => {
+                    const weekStartDate = new Date(now);
+                    weekStartDate.setDate(weekStartDate.getDate() - ((7 - index) * 7) - now.getDay());
+                    
                     const weekItem = document.createElement('div');
                     weekItem.className = 'week-item';
+                    
+                    const weekLabel = index === weeks.length - 1 ? 'This Week' : 
+                                     index === weeks.length - 2 ? 'Last Week' :
+                                     `${8 - index} weeks ago`;
+                    
                     weekItem.innerHTML = `
-                        <span class="week-label">Week ${index + 1}</span>
+                        <span class="week-label">${weekLabel}</span>
                         <span class="week-memos">${week.memos}</span>
                         <span class="week-tasks">${week.tasks}</span>
                         <span class="week-hours">${week.hours}h</span>
                     `;
+                    
+                    // Add some visual feedback for active weeks
+                    if (week.memos > 0 || week.tasks > 0) {
+                        weekItem.style.background = 'linear-gradient(135deg, #f0f9ff, #e0f2fe)';
+                        weekItem.style.border = '1px solid #bae6fd';
+                    }
+                    
                     container.appendChild(weekItem);
                 });
             }
@@ -975,42 +1157,81 @@
                 
                 container.innerHTML = '';
 
+                if (heatmapData.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--text-secondary);">No activity data available</p>';
+                    return;
+                }
+
                 heatmapData.forEach(day => {
                     const dayCell = document.createElement('div');
                     dayCell.className = `heatmap-day level-${day.level}`;
-                    dayCell.title = `${day.date}: ${day.activities} activities`;
+                    
+                    // Enhanced tooltip with better formatting
+                    const date = new Date(day.date);
+                    const dateStr = date.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        weekday: 'short'
+                    });
+                    
+                    dayCell.title = `${dateStr}: ${day.activities} ${day.activities === 1 ? 'activity' : 'activities'}`;
+                    
+                    // Add click handler for future detailed view
+                    dayCell.addEventListener('click', () => {
+                        console.log(`Clicked on ${day.date} with ${day.activities} activities`);
+                        // You could add a detailed view modal here in the future
+                    });
+                    
                     container.appendChild(dayCell);
                 });
+                
+                console.log(`Rendered ${heatmapData.length} heatmap cells`);
             }
 
             getWeeklyData() {
-                // Generate weekly data for the past 8 weeks
+                // Generate weekly data for the past 8 weeks using filtered data
                 const weeks = [];
                 const now = new Date();
+                const filteredMemos = this.getFilteredMemos();
+                const filteredTasks = this.getFilteredTasks();
+                
+                console.log(`Generating weekly data with ${filteredMemos.length} memos and ${filteredTasks.length} tasks`);
                 
                 for (let i = 7; i >= 0; i--) {
                     const weekStart = new Date(now);
-                    weekStart.setDate(weekStart.getDate() - (i * 7));
+                    weekStart.setDate(weekStart.getDate() - (i * 7) - now.getDay()); // Start from Sunday
+                    weekStart.setHours(0, 0, 0, 0); // Start of day
+                    
                     const weekEnd = new Date(weekStart);
                     weekEnd.setDate(weekEnd.getDate() + 6);
+                    weekEnd.setHours(23, 59, 59, 999); // End of day
 
-                    const weekMemos = this.memos.filter(memo => {
-                        const memoDate = new Date(memo.date);
-                        return memoDate >= weekStart && memoDate <= weekEnd;
+                    const weekStartStr = weekStart.toISOString().split('T')[0];
+                    const weekEndStr = weekEnd.toISOString().split('T')[0];
+
+                    const weekMemos = filteredMemos.filter(memo => {
+                        if (!memo.date) return false;
+                        return memo.date >= weekStartStr && memo.date <= weekEndStr;
                     });
 
-                    const weekTasks = this.tasks.filter(task => {
-                        const taskDate = task.createdAt ? new Date(task.createdAt.toDate()) : new Date();
-                        return taskDate >= weekStart && taskDate <= weekEnd;
+                    const weekTasks = filteredTasks.filter(task => {
+                        if (!task.createdAt) return false;
+                        const taskDate = task.createdAt.toDate ? 
+                            task.createdAt.toDate().toISOString().split('T')[0] :
+                            new Date(task.createdAt).toISOString().split('T')[0];
+                        return taskDate >= weekStartStr && taskDate <= weekEndStr;
                     });
+
+                    const totalHours = weekMemos.reduce((sum, memo) => sum + (parseFloat(memo.duration) || 0), 0);
 
                     weeks.push({
                         memos: weekMemos.length,
                         tasks: weekTasks.length,
-                        hours: Math.round(weekMemos.reduce((sum, memo) => sum + (parseFloat(memo.duration) || 0), 0))
+                        hours: Math.round(totalHours * 10) / 10 // Round to 1 decimal place
                     });
                 }
 
+                console.log('Weekly data generated:', weeks);
                 return weeks;
             }
 
@@ -1019,22 +1240,34 @@
                 const now = new Date();
                 const startDate = new Date(now);
                 startDate.setDate(startDate.getDate() - 84); // 12 weeks
+                startDate.setHours(0, 0, 0, 0);
+                
+                const filteredMemos = this.getFilteredMemos();
+                const filteredTasks = this.getFilteredTasks();
+                
+                console.log(`Generating heatmap with ${filteredMemos.length} memos and ${filteredTasks.length} tasks`);
 
                 for (let i = 0; i < 84; i++) {
                     const date = new Date(startDate);
                     date.setDate(date.getDate() + i);
                     
                     const dateString = date.toISOString().split('T')[0];
-                    const dayMemos = this.memos.filter(memo => memo.date === dateString).length;
-                    const dayTasks = this.tasks.filter(task => {
-                        const taskDate = task.createdAt ? 
-                            new Date(task.createdAt.toDate()).toISOString().split('T')[0] : 
-                            null;
+                    
+                    const dayMemos = filteredMemos.filter(memo => {
+                        return memo.date && memo.date === dateString;
+                    }).length;
+                    
+                    const dayTasks = filteredTasks.filter(task => {
+                        if (!task.createdAt) return false;
+                        const taskDate = task.createdAt.toDate ? 
+                            task.createdAt.toDate().toISOString().split('T')[0] :
+                            new Date(task.createdAt).toISOString().split('T')[0];
                         return taskDate === dateString;
                     }).length;
 
                     const activities = dayMemos + dayTasks;
-                    const level = Math.min(Math.floor(activities / 2), 4);
+                    // Improved level calculation: 0 activities = level 0, 1-2 = level 1, 3-4 = level 2, etc.
+                    const level = activities === 0 ? 0 : Math.min(Math.ceil(activities / 2), 4);
 
                     days.push({
                         date: dateString,
@@ -1043,6 +1276,7 @@
                     });
                 }
 
+                console.log(`Heatmap data generated: ${days.length} days`);
                 return days;
             }
 
