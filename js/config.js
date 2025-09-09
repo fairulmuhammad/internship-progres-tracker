@@ -2,7 +2,7 @@
 // SECURITY WARNING: Replace with your NEW API key
 // This file should be in .gitignore to prevent exposure
 export const firebaseConfig = {
-    apiKey: "YOUR_NEW_API_KEY_HERE", // Replace with new key from Firebase Console
+    apiKey: "AIzaSyAYr8zPaJp152ZDiE3LAjxR4Od48IuwhfU", // Replace with new key from Firebase Console
     authDomain: "internship-tracker-v01.firebaseapp.com",
     projectId: "internship-tracker-v01",
     storageBucket: "internship-tracker-v01.firebasestorage.app",

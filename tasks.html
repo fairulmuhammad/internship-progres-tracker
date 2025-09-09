@@ -1301,18 +1301,13 @@
 
             async initializeFirebase() {
                 try {
-                    const firebaseConfig = {
-                        apiKey: "YOUR_NEW_API_KEY_HERE", // REPLACE WITH NEW KEY
-                        authDomain: "internship-tracker-v01.firebaseapp.com",
-                        projectId: "internship-tracker-v01",
-                        storageBucket: "internship-tracker-v01.firebasestorage.app",
-                        messagingSenderId: "33562128425",
-                        appId: "1:33562128425:web:21084944a8360cf6ecec38"
-                    };
-
-                    const app = window.Firebase.initializeApp(firebaseConfig);
-                    this.auth = window.Firebase.getAuth(app);
-                    this.db = window.Firebase.getFirestore(app);
+                    // Import centralized Firebase service
+                    const { initializeFirebase: initFirebase } = await import('./js/firebase-service.js');
+                    
+                    // Initialize Firebase using centralized config
+                    const { auth, db } = await initFirebase();
+                    this.auth = auth;
+                    this.db = db;
                     
                     // Set authentication persistence to keep users logged in
                     const { setPersistence, browserLocalPersistence } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
