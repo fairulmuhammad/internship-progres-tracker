@@ -1,5 +1,6 @@
 // Authentication UI Components - Login/Signup modals and user interface
 import { authService } from '../services/auth-service.js';
+import { uiComponents } from '../ui-components.js';
 
 class AuthUI {
     constructor() {
@@ -466,11 +467,17 @@ class AuthUI {
 
         // Sign out
         signOutBtn.addEventListener('click', async () => {
-            try {
-                await authService.signOut();
-            } catch (error) {
-                console.error('Sign out error:', error);
-            }
+            uiComponents.showConfirmDialog(
+                'Are you sure you want to sign out? Make sure all your changes are saved.',
+                async () => {
+                    try {
+                        await authService.signOut();
+                    } catch (error) {
+                        console.error('Sign out error:', error);
+                        uiComponents.showNotification('Failed to sign out. Please try again.', 'error');
+                    }
+                }
+            );
         });
     }
 }

@@ -167,10 +167,14 @@ class InternshipTracker {
         
         // Authentication buttons
         const loginBtn = document.getElementById('login-btn');
-        const signupBtn = document.getElementById('signup-btn');
+        const signOutBtn = document.getElementById('sign-out-btn');
         
         if (loginBtn) {
             loginBtn.addEventListener('click', () => this.authUI.showLoginModal());
+        }
+        
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', () => this.handleSignOut());
         }
     }
 
@@ -1155,7 +1159,6 @@ class InternshipTracker {
                         <div class="setting-actions">
                             <button class="btn btn-secondary" id="change-password">🔑 Change Password</button>
                             <button class="btn btn-secondary" id="extend-session">⏰ Extend Session</button>
-                            <button class="btn btn-error" id="sign-out-all">🚪 Sign Out</button>
                         </div>
                     </div>
 
@@ -1203,7 +1206,6 @@ class InternshipTracker {
         const clearCacheBtn = overlay.querySelector('#clear-cache');
         const changePasswordBtn = overlay.querySelector('#change-password');
         const extendSessionBtn = overlay.querySelector('#extend-session');
-        const signOutBtn = overlay.querySelector('#sign-out-all');
 
         // Refresh data
         refreshBtn?.addEventListener('click', async () => {
@@ -1250,20 +1252,6 @@ class InternshipTracker {
             uiComponents.showNotification('Session extended successfully!', 'success');
             overlay.remove();
         });
-
-        // Sign out
-        signOutBtn?.addEventListener('click', () => {
-            uiComponents.showConfirmDialog(
-                'Are you sure you want to sign out? Make sure all your changes are saved.',
-                async () => {
-                    try {
-                        await authService.signOut();
-                    } catch (error) {
-                        console.error('Sign out error:', error);
-                    }
-                }
-            );
-        });
     }
 
     // Get sync status text
@@ -1307,6 +1295,21 @@ class InternshipTracker {
                 } catch (error) {
                     console.error('Password reset error:', error);
                     uiComponents.showNotification('Failed to send password reset email', 'error');
+                }
+            }
+        );
+    }
+
+    // Handle sign out with confirmation
+    handleSignOut() {
+        uiComponents.showConfirmDialog(
+            'Are you sure you want to sign out? Make sure all your changes are saved.',
+            async () => {
+                try {
+                    await authService.signOut();
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                    uiComponents.showNotification('Failed to sign out. Please try again.', 'error');
                 }
             }
         );
