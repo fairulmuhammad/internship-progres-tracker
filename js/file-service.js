@@ -115,12 +115,23 @@ class FileService {
 
     // View file in modal (for images)
     viewFile(fileData) {
+        console.log('🖱️ viewFile called with:', fileData);
+        
         if (!this.isImage(fileData.type)) {
+            console.error('❌ File type not supported for viewing:', fileData.type);
             throw new Error('File type not supported for viewing');
         }
 
+        console.log('✅ Creating image modal...');
         const modal = this.createImageModal(fileData);
         document.body.appendChild(modal);
+        
+        // Add the 'show' class to make it visible (required by CSS)
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+        
+        console.log('✅ Modal added to document body and made visible');
     }
 
     // Create image viewing modal
@@ -135,12 +146,31 @@ class FileService {
         modalContent.style.maxHeight = '90vh';
         
         const img = document.createElement('img');
-        img.src = fileData.data;
+        console.log('🖼️ Setting image source:', fileData.data.substring(0, 50) + '...');
+        
+        // Ensure data URL format is correct
+        let imgSrc = fileData.data;
+        if (!imgSrc.startsWith('data:')) {
+            console.log('📝 Adding data URL prefix...');
+            imgSrc = `data:${fileData.type};base64,${imgSrc}`;
+        }
+        
+        img.src = imgSrc;
         img.alt = fileData.name;
         img.style.maxWidth = '100%';
         img.style.maxHeight = '100%';
         img.style.objectFit = 'contain';
         img.style.display = 'block';
+        
+        // Add load and error event listeners for debugging
+        img.onload = () => {
+            console.log('✅ Image loaded successfully:', fileData.name);
+        };
+        
+        img.onerror = () => {
+            console.error('❌ Failed to load image:', fileData.name);
+            console.error('Data URL format:', imgSrc.substring(0, 100));
+        };
         
         const closeBtn = document.createElement('button');
         closeBtn.className = 'modal-close';
@@ -148,9 +178,14 @@ class FileService {
         closeBtn.setAttribute('aria-label', 'Close');
         
         const closeModal = () => {
-            if (document.body.contains(modal)) {
-                document.body.removeChild(modal);
-            }
+            console.log('🚪 Closing modal...');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                if (document.body.contains(modal)) {
+                    document.body.removeChild(modal);
+                    console.log('✅ Modal removed from document');
+                }
+            }, 300); // Wait for transition
         };
         
         closeBtn.onclick = closeModal;

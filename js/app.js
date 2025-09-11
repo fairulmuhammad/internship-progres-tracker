@@ -760,7 +760,10 @@ class InternshipTracker {
                 const viewBtn = document.createElement('button');
                 viewBtn.className = 'btn btn-sm btn-secondary';
                 viewBtn.innerHTML = '👁️';
-                viewBtn.onclick = () => fileService.viewFile(file);
+                viewBtn.onclick = () => {
+                    console.log('🖱️ EYE BUTTON CLICKED - Testing debug');
+                    fileService.viewFile(file);
+                };
                 actions.appendChild(viewBtn);
             }
             
