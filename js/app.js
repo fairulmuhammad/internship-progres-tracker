@@ -169,12 +169,22 @@ class InternshipTracker {
         const loginBtn = document.getElementById('login-btn');
         const signOutBtn = document.getElementById('sign-out-btn');
         
+        console.log('🔧 Sign-out button found:', !!signOutBtn);
+        console.log('🔧 Login button found:', !!loginBtn);
+        
         if (loginBtn) {
             loginBtn.addEventListener('click', () => this.authUI.showLoginModal());
+            console.log('✅ Login button event listener added');
         }
         
         if (signOutBtn) {
-            signOutBtn.addEventListener('click', () => this.handleSignOut());
+            signOutBtn.addEventListener('click', () => {
+                console.log('🚪 Sign-out button clicked!');
+                this.handleSignOut();
+            });
+            console.log('✅ Sign-out button event listener added');
+        } else {
+            console.warn('⚠️ Sign-out button not found in DOM');
         }
     }
 
@@ -1304,18 +1314,41 @@ class InternshipTracker {
     }
 
     // Handle sign out with confirmation
-    handleSignOut() {
-        uiComponents.showConfirmDialog(
-            'Are you sure you want to sign out? Make sure all your changes are saved.',
-            async () => {
+    async handleSignOut() {
+        console.log('🚪 handleSignOut called');
+        console.log('🔍 uiComponents object:', uiComponents);
+        console.log('🔍 showConfirmDialog method:', uiComponents.showConfirmDialog);
+        
+        try {
+            console.log('📞 About to call uiComponents.showConfirmDialog...');
+            uiComponents.showConfirmDialog(
+                'Are you sure you want to sign out? Make sure all your changes are saved.',
+                async () => {
+                    try {
+                        console.log('🔓 Attempting to sign out...');
+                        await authService.signOut();
+                        console.log('✅ Sign out successful');
+                    } catch (error) {
+                        console.error('❌ Sign out error:', error);
+                        uiComponents.showNotification('Failed to sign out. Please try again.', 'error');
+                    }
+                }
+            );
+            console.log('✅ showConfirmDialog called successfully');
+        } catch (dialogError) {
+            console.error('❌ Error showing confirmation dialog:', dialogError);
+            // Fallback: use browser confirm
+            if (confirm('Are you sure you want to sign out? Make sure all your changes are saved.')) {
                 try {
+                    console.log('🔓 Attempting to sign out (fallback)...');
                     await authService.signOut();
+                    console.log('✅ Sign out successful (fallback)');
                 } catch (error) {
-                    console.error('Sign out error:', error);
-                    uiComponents.showNotification('Failed to sign out. Please try again.', 'error');
+                    console.error('❌ Sign out error (fallback):', error);
+                    alert('Failed to sign out. Please try again.');
                 }
             }
-        );
+        }
     }
 
 }

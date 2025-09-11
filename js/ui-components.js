@@ -200,21 +200,26 @@ export class UIComponents {
         const actions = document.createElement('div');
         actions.className = 'flex gap-3 justify-end';
         
+        // Helper function to close modal with animation
+        const closeModal = (callback) => {
+            overlay.classList.remove('show');
+            setTimeout(() => {
+                if (document.body.contains(overlay)) {
+                    document.body.removeChild(overlay);
+                }
+                if (callback) callback();
+            }, 200); // Match CSS transition duration
+        };
+        
         const cancelBtn = document.createElement('button');
         cancelBtn.className = 'btn btn-secondary';
         cancelBtn.textContent = 'Cancel';
-        cancelBtn.onclick = () => {
-            document.body.removeChild(overlay);
-            if (onCancel) onCancel();
-        };
+        cancelBtn.onclick = () => closeModal(onCancel);
         
         const confirmBtn = document.createElement('button');
         confirmBtn.className = 'btn btn-danger';
         confirmBtn.textContent = 'Confirm';
-        confirmBtn.onclick = () => {
-            document.body.removeChild(overlay);
-            onConfirm();
-        };
+        confirmBtn.onclick = () => closeModal(onConfirm);
         
         actions.appendChild(cancelBtn);
         actions.appendChild(confirmBtn);
@@ -226,12 +231,17 @@ export class UIComponents {
         // Close on overlay click
         overlay.onclick = (e) => {
             if (e.target === overlay) {
-                document.body.removeChild(overlay);
-                if (onCancel) onCancel();
+                closeModal(onCancel);
             }
         };
         
         document.body.appendChild(overlay);
+        
+        // Add show class after a brief delay to trigger CSS transition
+        setTimeout(() => {
+            overlay.classList.add('show');
+        }, 10);
+        
         confirmBtn.focus();
     }
 
