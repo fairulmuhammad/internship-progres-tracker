@@ -160,6 +160,20 @@ export async function onAuthStateChanged(callback) {
     return firebaseOnAuthStateChanged(auth, callback);
 }
 
+export async function fetchSignInMethodsForEmail(email) {
+    try {
+        const { fetchSignInMethodsForEmail: firebaseFetchSignInMethods } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+        const { auth } = await initializeFirebase();
+        
+        const methods = await firebaseFetchSignInMethods(auth, email);
+        console.log('✅ Sign-in methods fetched for', email, ':', methods);
+        return methods;
+    } catch (error) {
+        console.error('❌ Failed to fetch sign-in methods:', error);
+        throw error;
+    }
+}
+
 /**
  * Password Reset
  */

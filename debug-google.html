@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sign-in Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .debug-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #3367d6;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Google Sign-in Diagnostic Tool</h1>
+    
+    <div id="results"></div>
+    
+    <h2>Test Buttons:</h2>
+    <button onclick="testFirebaseInit()">1. Test Firebase Initialization</button>
+    <button onclick="testGoogleProvider()">2. Test Google Provider</button>
+    <button onclick="testGoogleSignIn()">3. Test Google Sign-in</button>
+    <button onclick="checkDomain()">4. Check Current Domain</button>
+    
+    <script type="module">
+        import { initializeFirebase, signInWithGoogle } from './js/firebase-service.js';
+        
+        const results = document.getElementById('results');
+        
+        function addResult(title, message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `debug-info ${type}`;
+            div.innerHTML = `<strong>${title}:</strong> ${message}`;
+            results.appendChild(div);
+        }
+        
+        // Make functions available globally
+        window.testFirebaseInit = async function() {
+            try {
+                addResult('🔄 Testing', 'Initializing Firebase...', 'info');
+                const { auth } = await initializeFirebase();
+                addResult('✅ Firebase Init', 'Successfully initialized Firebase Auth', 'success');
+                addResult('ℹ️ Auth Domain', auth.config.authDomain, 'info');
+            } catch (error) {
+                addResult('❌ Firebase Init Failed', error.message, 'error');
+                console.error('Firebase init error:', error);
+            }
+        };
+        
+        window.testGoogleProvider = async function() {
+            try {
+                addResult('🔄 Testing', 'Creating Google Auth Provider...', 'info');
+                const { GoogleAuthProvider } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+                const provider = new GoogleAuthProvider();
+                addResult('✅ Provider Created', 'Google Auth Provider created successfully', 'success');
+            } catch (error) {
+                addResult('❌ Provider Failed', error.message, 'error');
+                console.error('Provider error:', error);
+            }
+        };
+        
+        window.testGoogleSignIn = async function() {
+            try {
+                addResult('🔄 Testing', 'Attempting Google Sign-in...', 'info');
+                const user = await signInWithGoogle();
+                addResult('✅ Sign-in Success', `Signed in as: ${user.email}`, 'success');
+            } catch (error) {
+                addResult('❌ Sign-in Failed', `${error.code}: ${error.message}`, 'error');
+                console.error('Sign-in error:', error);
+                
+                // Provide specific guidance based on error
+                if (error.code === 'auth/unauthorized-domain') {
+                    addResult('🔧 Fix Required', 'Add localhost:8005 to authorized domains in Firebase Console > Authentication > Settings > Authorized domains', 'error');
+                } else if (error.code === 'auth/popup-blocked') {
+                    addResult('🔧 Fix Required', 'Pop-up was blocked by browser. Please allow pop-ups for this site.', 'error');
+                } else if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
+                    addResult('ℹ️ Info', 'Sign-in was cancelled by user', 'info');
+                }
+            }
+        };
+        
+        window.checkDomain = function() {
+            const currentDomain = window.location.origin;
+            addResult('🌐 Current Domain', currentDomain, 'info');
+            addResult('ℹ️ Note', 'This domain must be added to Firebase Console > Authentication > Settings > Authorized domains', 'info');
+        };
+        
+        // Auto-run initial tests
+        document.addEventListener('DOMContentLoaded', () => {
+            addResult('🚀 Starting', 'Google Sign-in Diagnostic Tool loaded', 'success');
+            checkDomain();
+        });
+    </script>
+</body>
+</html>

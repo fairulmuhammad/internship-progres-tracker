@@ -120,7 +120,7 @@ class AuthService {
         }
     }
 
-    // Sign up with email and password
+    // Sign up with email and password - with intelligent account detection
     async signUpWithEmail(email, password, displayName) {
         if (!this.isInitialized) {
             throw new Error('Auth service not initialized');
@@ -149,14 +149,14 @@ class AuthService {
             
             // Handle email already in use (including Google accounts)
             if (error.code === 'auth/email-already-in-use') {
-                throw new Error('An account with this email already exists. You can:\n\n1. Sign in with your existing password\n2. Use Google Sign-in if you registered with Google\n3. Reset your password if forgotten\n\nNote: All methods access the same account data.');
+                throw new Error('An account with this email already exists. Please try:\n\n1. Sign in with your existing password\n2. Use Google Sign-in if you originally registered with Google\n3. Reset your password if you forgot it\n\nAll sign-in methods will access the same account and data.');
             }
             
             throw new Error(this.getReadableErrorMessage(error.code));
         }
     }
 
-    // Sign in with email and password
+    // Sign in with email and password - with intelligent account linking
     async signInWithEmail(email, password) {
         if (!this.isInitialized) {
             throw new Error('Auth service not initialized');
@@ -176,14 +176,25 @@ class AuthService {
             
             // Handle account exists with different credential - offer account linking
             if (error.code === 'auth/account-exists-with-different-credential') {
-                throw new Error('This email is already registered with Google Sign-in. You can:\n\n1. Sign in with Google, or\n2. Contact support to link your accounts\n\nNote: Both methods will access the same account data.');
+                throw new Error('This email is already registered with Google Sign-in. Please sign in with Google instead. All your data will be accessible from both sign-in methods.');
+            }
+            
+            // Handle case where user tries to sign in with email/password but only has Google
+            if (error.code === 'auth/user-not-found') {
+                // Check if they might have a Google account with this email
+                throw new Error('No password-based account found with this email. If you previously signed in with Google, please use Google Sign-in instead.');
+            }
+            
+            if (error.code === 'auth/wrong-password') {
+                // Maybe they registered with Google and are trying password
+                throw new Error('Incorrect password. If you registered with Google, please use Google Sign-in instead.');
             }
             
             throw new Error(this.getReadableErrorMessage(error.code));
         }
     }
 
-    // Sign in with Google
+    // Sign in with Google - with intelligent account linking
     async signInWithGoogle() {
         if (!this.isInitialized) {
             throw new Error('Auth service not initialized');
@@ -207,6 +218,9 @@ class AuthService {
                 throw new Error('This domain is not authorized for Google Sign-in. Please check Firebase Console settings.');
             } else if (error.code === 'auth/operation-not-allowed') {
                 throw new Error('Google Sign-in is not enabled. Please check Firebase Console settings.');
+            } else if (error.code === 'auth/account-exists-with-different-credential') {
+                // User already has an email/password account
+                throw new Error('An account with this email already exists with email/password login. Please sign in with your email and password instead. All your data will be accessible from both sign-in methods.');
             }
             
             throw new Error(this.getReadableErrorMessage(error.code));
@@ -261,6 +275,99 @@ class AuthService {
         } catch (error) {
             console.error('Sign out error:', error);
             throw new Error('Failed to sign out');
+        }
+    }
+
+    // Check what sign-in methods are available for an email
+    async getSignInMethodsForEmail(email) {
+        if (!this.isInitialized) {
+            throw new Error('Auth service not initialized');
+        }
+
+        try {
+            const { fetchSignInMethodsForEmail } = await import('../firebase-service.js');
+            const methods = await fetchSignInMethodsForEmail(email);
+            
+            console.log(`Sign-in methods for ${email}:`, methods);
+            return methods;
+            
+        } catch (error) {
+            console.error('Error fetching sign-in methods:', error);
+            return [];
+        }
+    }
+
+    // Helper method to provide user-friendly guidance based on available sign-in methods
+    async getSignInGuidance(email) {
+        const methods = await this.getSignInMethodsForEmail(email);
+        
+        if (methods.length === 0) {
+            return 'No account found with this email. You can create a new account.';
+        }
+        
+        const hasPassword = methods.includes('password');
+        const hasGoogle = methods.includes('google.com');
+        
+        if (hasPassword && hasGoogle) {
+            return 'You can sign in with either your password or Google account using this email.';
+        } else if (hasPassword) {
+            return 'Please sign in with your email and password.';
+        } else if (hasGoogle) {
+            return 'Please sign in with your Google account.';
+        }
+        
+        return 'Please try a different sign-in method.';
+    }
+
+    // Link email/password to current Google account
+    async linkEmailPassword(password) {
+        if (!this.isInitialized) {
+            throw new Error('Auth service not initialized');
+        }
+        
+        if (!this.currentUser) {
+            throw new Error('No user is currently signed in');
+        }
+
+        try {
+            const { linkEmailPassword } = await import('../firebase-service.js');
+            const user = await linkEmailPassword(this.currentUser.email, password);
+            
+            console.log('Email/password linked successfully');
+            return {
+                user,
+                message: 'Email/password sign-in has been linked to your account!'
+            };
+            
+        } catch (error) {
+            console.error('Account linking error:', error);
+            throw new Error(this.getReadableErrorMessage(error.code));
+        }
+    }
+
+    // Link Google account to current email/password account
+    async linkGoogleAccount() {
+        if (!this.isInitialized) {
+            throw new Error('Auth service not initialized');
+        }
+        
+        if (!this.currentUser) {
+            throw new Error('No user is currently signed in');
+        }
+
+        try {
+            const { linkGoogleAccount } = await import('../firebase-service.js');
+            const user = await linkGoogleAccount();
+            
+            console.log('Google account linked successfully');
+            return {
+                user,
+                message: 'Google sign-in has been linked to your account!'
+            };
+            
+        } catch (error) {
+            console.error('Google account linking error:', error);
+            throw new Error(this.getReadableErrorMessage(error.code));
         }
     }
 
